@@ -531,6 +531,37 @@ tbody tr:hover td { background: var(--accent-light); }
   padding: 10px 12px;
   font-size: 0.82rem;
   margin-bottom: 14px;
+  overflow: hidden;
+  position: relative;
+}
+
+.login-error-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: var(--danger);
+  width: 100%;
+  animation: login-bar-shrink 8s linear forwards;
+}
+
+@keyframes login-bar-shrink {
+  from { width: 100%; }
+  to   { width: 0%; }
+}
+
+@keyframes login-shake {
+  0%, 100% { transform: translateX(0); }
+  15%       { transform: translateX(-8px); }
+  30%       { transform: translateX(8px); }
+  45%       { transform: translateX(-6px); }
+  60%       { transform: translateX(6px); }
+  75%       { transform: translateX(-3px); }
+  90%       { transform: translateX(3px); }
+}
+
+.login-shake {
+  animation: login-shake 0.6s ease;
 }
 
 .login-theme {

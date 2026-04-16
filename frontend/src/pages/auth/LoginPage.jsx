@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
@@ -10,6 +10,10 @@ export default function LoginPage() {
   const [form, setForm] = useState({ username: '', password: '' })
   const [error, setError] = useState(null)
   const [cargando, setCargando] = useState(false)
+  const [shake, setShake] = useState(false)
+  const timerRef = useRef(null)
+
+  useEffect(() => () => clearTimeout(timerRef.current), [])
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -19,7 +23,16 @@ export default function LoginPage() {
       await login(form.username, form.password)
       navigate('/')
     } catch (err) {
-      setError(err?.error || 'Error al iniciar sesión')
+      const mensaje = err?.error || 'Error al iniciar sesión'
+      setError(mensaje)
+      // Limpiar solo la contraseña, mantener el username
+      setForm(f => ({ ...f, password: '' }))
+      // Animación de shake
+      setShake(true)
+      setTimeout(() => setShake(false), 600)
+      // Auto-dismiss a los 8 segundos
+      clearTimeout(timerRef.current)
+      timerRef.current = setTimeout(() => setError(null), 8000)
     } finally {
       setCargando(false)
     }
@@ -31,13 +44,18 @@ export default function LoginPage() {
         {tema === 'dark' ? '☀️' : '🌙'}
       </button>
 
-      <div className="login-card">
+      <div className={`login-card${shake ? ' login-shake' : ''}`}>
         <div className="login-brand">
           <h1>Servi<span>Control</span></h1>
           <p>Sistema de gestión para seguridad electrónica</p>
         </div>
 
-        {error && <div className="login-error">⚠️ {error}</div>}
+        {error && (
+          <div className="login-error">
+            <span>⚠️ {error}</span>
+            <div className="login-error-bar" />
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
