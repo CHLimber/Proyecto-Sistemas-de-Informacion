@@ -1,0 +1,38 @@
+# ── Python ──────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Entorno virtual
+venv/
+.venv/
+env/
+
+# Variables de entorno (¡NUNCA subir al repo!)
+backend/.env
+
+# ── Node / React ─────────────────────────────────────
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+
+# ── IDEs ─────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── Sistema ──────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Migraciones compiladas ───────────────────────────
+migrations/__pycache__/

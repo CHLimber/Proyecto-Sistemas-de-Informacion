@@ -1,0 +1,338 @@
+import { useState, useEffect } from 'react'
+import { entidadesApi } from '../../api/entidades'
+
+const FORM_NATURAL = {
+  tipo: 'natural', nombre: '', ci: '', sexo: '', fecha_nacimiento: '',
+  email: '', cliente: false, empleado: false,
+}
+const FORM_JURIDICA = {
+  tipo: 'juridica', razon_social: '', nombre_comercial: '', nit: '',
+  email: '', cliente: false, empleado: false,
+}
+
+export default function EntidadesPage() {
+  const [entidades, setEntidades]     = useState([])
+  const [cargando, setCargando]       = useState(true)
+  const [error, setError]             = useState(null)
+  const [busqueda, setBusqueda]       = useState('')
+  const [filtroRol, setFiltroRol]     = useState('')   // '', 'cliente', 'empleado'
+  const [modalAbierto, setModalAbierto] = useState(false)
+  const [editando, setEditando]       = useState(null)
+  const [form, setForm]               = useState(FORM_NATURAL)
+  const [guardando, setGuardando]     = useState(false)
+  const [errForm, setErrForm]         = useState('')
+
+  useEffect(() => { cargarDatos() }, [])
+
+  async function cargarDatos() {
+    try {
+      setCargando(true)
+      setEntidades(await entidadesApi.listar())
+    } catch {
+      setError('No se pudo cargar las entidades.')
+    } finally {
+      setCargando(false)
+    }
+  }
+
+  function abrirCrear() {
+    setEditando(null)
+    setForm(FORM_NATURAL)
+    setErrForm('')
+    setModalAbierto(true)
+  }
+
+  function abrirEditar(e) {
+    setEditando(e)
+    if (e.tipo === 'natural') {
+      setForm({
+        tipo: 'natural',
+        nombre: e.nombre || '',
+        ci: e.ci || '',
+        sexo: e.sexo || '',
+        fecha_nacimiento: e.fecha_nacimiento || '',
+        email: e.email || '',
+        cliente: e.cliente,
+        empleado: e.empleado,
+      })
+    } else {
+      setForm({
+        tipo: 'juridica',
+        razon_social: e.nombre || '',
+        nombre_comercial: e.nombre_comercial || '',
+        nit: e.nit || '',
+        email: e.email || '',
+        cliente: e.cliente,
+        empleado: e.empleado,
+      })
+    }
+    setErrForm('')
+    setModalAbierto(true)
+  }
+
+  function cerrarModal() {
+    setModalAbierto(false)
+    setEditando(null)
+    setErrForm('')
+  }
+
+  function cambiarTipo(tipo) {
+    setForm(tipo === 'natural' ? FORM_NATURAL : FORM_JURIDICA)
+    setErrForm('')
+  }
+
+  async function guardar(e) {
+    e.preventDefault()
+    setGuardando(true)
+    setErrForm('')
+    try {
+      if (editando) {
+        const data = await entidadesApi.actualizar(editando.id, form)
+        setEntidades(prev => prev.map(x => x.id === editando.id ? data : x))
+      } else {
+        const data = await entidadesApi.crear(form)
+        setEntidades(prev => [...prev, data])
+      }
+      cerrarModal()
+    } catch (err) {
+      setErrForm(err.error || err.message || 'Error al guardar.')
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  async function desactivar(id, nombre) {
+    if (!confirm(`¿Desactivar "${nombre}"?`)) return
+    try {
+      await entidadesApi.desactivar(id)
+      setEntidades(prev => prev.filter(x => x.id !== id))
+    } catch {
+      alert('No se pudo desactivar la entidad.')
+    }
+  }
+
+  const filtradas = entidades.filter(e => {
+    const txt = (e.nombre + (e.ci || '') + (e.nit || '')).toLowerCase()
+    const coincideBusqueda = txt.includes(busqueda.toLowerCase())
+    const coincideRol =
+      filtroRol === '' ||
+      (filtroRol === 'cliente' && e.cliente) ||
+      (filtroRol === 'empleado' && e.empleado)
+    return coincideBusqueda && coincideRol
+  })
+
+  return (
+    <>
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Entidades</h1>
+          <p className="page-subtitle">Clientes y empleados registrados</p>
+        </div>
+        <button className="btn btn-primary" onClick={abrirCrear}>+ Nueva entidad</button>
+      </div>
+
+      {/* Filtros */}
+      <div className="card" style={{ marginBottom: 20 }}>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <input
+            className="input"
+            style={{ flex: 1, minWidth: 200 }}
+            placeholder="Buscar por nombre, CI o NIT..."
+            value={busqueda}
+            onChange={e => setBusqueda(e.target.value)}
+          />
+          <select
+            className="input"
+            style={{ minWidth: 160 }}
+            value={filtroRol}
+            onChange={e => setFiltroRol(e.target.value)}
+          >
+            <option value="">Todos</option>
+            <option value="cliente">Solo clientes</option>
+            <option value="empleado">Solo empleados</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Tabla */}
+      <div className="card">
+        {cargando ? (
+          <div className="empty-state">Cargando entidades...</div>
+        ) : error ? (
+          <div className="empty-state" style={{ color: 'var(--danger)' }}>{error}</div>
+        ) : filtradas.length === 0 ? (
+          <div className="empty-state">No se encontraron entidades.</div>
+        ) : (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Tipo</th>
+                  <th>Documento</th>
+                  <th>Email</th>
+                  <th>Rol</th>
+                  <th style={{ width: 100 }}>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtradas.map(e => (
+                  <tr key={e.id}>
+                    <td style={{ fontWeight: 500 }}>{e.nombre}</td>
+                    <td>
+                      <span className={`badge ${e.tipo === 'natural' ? 'badge-blue' : 'badge-purple'}`}>
+                        {e.tipo === 'natural' ? 'Natural' : 'Jurídica'}
+                      </span>
+                    </td>
+                    <td className="text-sm text-muted">
+                      {e.tipo === 'natural' ? `CI: ${e.ci}` : e.nit ? `NIT: ${e.nit}` : '—'}
+                    </td>
+                    <td className="text-sm text-muted">{e.email || '—'}</td>
+                    <td>
+                      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                        {e.cliente  && <span className="badge badge-green">Cliente</span>}
+                        {e.empleado && <span className="badge badge-yellow">Empleado</span>}
+                        {!e.cliente && !e.empleado && <span className="text-muted text-sm">—</span>}
+                      </div>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <button className="btn btn-ghost btn-sm" onClick={() => abrirEditar(e)} title="Editar">✏️</button>
+                        <button className="btn btn-ghost btn-sm" onClick={() => desactivar(e.id, e.nombre)}
+                          title="Desactivar" style={{ color: 'var(--danger)' }}>🗑️</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        <div className="text-muted text-sm" style={{ padding: '10px 0 0' }}>
+          {filtradas.length} entidad{filtradas.length !== 1 ? 'es' : ''}
+        </div>
+      </div>
+
+      {/* Modal */}
+      {modalAbierto && (
+        <div className="modal-overlay" onClick={cerrarModal}>
+          <div className="modal" onClick={ev => ev.stopPropagation()}>
+            <div className="modal-header">
+              <h2 className="modal-title">{editando ? 'Editar entidad' : 'Nueva entidad'}</h2>
+              <button className="btn btn-ghost btn-sm" onClick={cerrarModal}>✕</button>
+            </div>
+
+            <form onSubmit={guardar}>
+              <div className="modal-body">
+
+                {/* Selector tipo (solo al crear) */}
+                {!editando && (
+                  <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+                    <button type="button"
+                      className={`btn ${form.tipo === 'natural' ? 'btn-primary' : 'btn-ghost'}`}
+                      style={{ flex: 1 }}
+                      onClick={() => cambiarTipo('natural')}>
+                      Persona natural
+                    </button>
+                    <button type="button"
+                      className={`btn ${form.tipo === 'juridica' ? 'btn-primary' : 'btn-ghost'}`}
+                      style={{ flex: 1 }}
+                      onClick={() => cambiarTipo('juridica')}>
+                      Persona jurídica
+                    </button>
+                  </div>
+                )}
+
+                <div className="form-grid">
+                  {form.tipo === 'natural' ? (
+                    <>
+                      <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                        <label className="form-label">Nombre completo *</label>
+                        <input className="input" value={form.nombre}
+                          onChange={e => setForm(f => ({ ...f, nombre: e.target.value }))}
+                          placeholder="Ej: Juan Carlos Pérez Ríos" maxLength={150} />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">CI *</label>
+                        <input className="input" value={form.ci}
+                          onChange={e => setForm(f => ({ ...f, ci: e.target.value }))}
+                          placeholder="Ej: 7654321 SC" maxLength={20} />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Sexo</label>
+                        <select className="input" value={form.sexo}
+                          onChange={e => setForm(f => ({ ...f, sexo: e.target.value }))}>
+                          <option value="">Sin especificar</option>
+                          <option value="M">Masculino</option>
+                          <option value="F">Femenino</option>
+                        </select>
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Fecha de nacimiento</label>
+                        <input type="date" className="input" value={form.fecha_nacimiento}
+                          onChange={e => setForm(f => ({ ...f, fecha_nacimiento: e.target.value }))} />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                        <label className="form-label">Razón social *</label>
+                        <input className="input" value={form.razon_social}
+                          onChange={e => setForm(f => ({ ...f, razon_social: e.target.value }))}
+                          placeholder="Ej: Importadora Rojas SRL" maxLength={200} />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Nombre comercial</label>
+                        <input className="input" value={form.nombre_comercial}
+                          onChange={e => setForm(f => ({ ...f, nombre_comercial: e.target.value }))}
+                          placeholder="Ej: Rojas Import" maxLength={150} />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">NIT</label>
+                        <input className="input" value={form.nit}
+                          onChange={e => setForm(f => ({ ...f, nit: e.target.value }))}
+                          placeholder="Ej: 123456789" maxLength={20} />
+                      </div>
+                    </>
+                  )}
+
+                  <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                    <label className="form-label">Email</label>
+                    <input type="email" className="input" value={form.email}
+                      onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                      placeholder="contacto@empresa.com" />
+                  </div>
+
+                  <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                    <label className="form-label">Rol</label>
+                    <div style={{ display: 'flex', gap: 20, marginTop: 4 }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                        <input type="checkbox" checked={form.cliente}
+                          onChange={e => setForm(f => ({ ...f, cliente: e.target.checked }))} />
+                        <span>Cliente</span>
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                        <input type="checkbox" checked={form.empleado}
+                          onChange={e => setForm(f => ({ ...f, empleado: e.target.checked }))} />
+                        <span>Empleado</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {errForm && <div className="alert alert-danger" style={{ marginTop: 12 }}>{errForm}</div>}
+              </div>
+
+              <div className="modal-footer">
+                <button type="button" className="btn btn-ghost" onClick={cerrarModal}>Cancelar</button>
+                <button type="submit" className="btn btn-primary" disabled={guardando}>
+                  {guardando ? 'Guardando...' : editando ? 'Guardar cambios' : 'Crear entidad'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}

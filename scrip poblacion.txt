@@ -1,0 +1,1386 @@
+-- ============================================================
+-- SERVICONTROL — POBLACIÓN v3 
+-- BD: AWGPMCESE | MySQL 5.7+ InnoDB utf8mb4
+-- Datos ficticios Santa Cruz de la Sierra, Bolivia
+-- ============================================================
+
+SET FOREIGN_KEY_CHECKS = 0;
+SET NAMES utf8mb4;
+
+-- ============================================================
+-- CATÁLOGOS BASE
+-- ============================================================
+
+INSERT INTO tipo_documento (nombre, descripcion) VALUES
+('Contrato',                    'Documento contractual firmado entre empresa y cliente'),
+('Cotización',                  'Presupuesto detallado de materiales y mano de obra'),
+('Acta de Entrega',             'Acta que certifica la entrega del sistema instalado'),
+('Acta de Conformidad',         'Confirmación de satisfacción del cliente con el servicio'),
+('Acta de Garantía',            'Documento que establece términos y duración de garantía'),
+('Compromiso de Mantenimiento', 'Acuerdo de mantenimiento preventivo periódico'),
+('Croquis',                     'Plano o esquema de ubicación de equipos'),
+('Orden de Compra',             'Documento de compra de materiales a proveedor'),
+('Informe Técnico',             'Reporte técnico de instalación, mantenimiento o correctivo'),
+('Acta de Inicio',              'Documento que formaliza el inicio de un proyecto');
+
+INSERT INTO municipio (nombre) VALUES
+('Santa Cruz de la Sierra'),
+('Warnes'),
+('Montero'),
+('La Guardia'),
+('El Torno'),
+('Cotoca'),
+('Porongo'),
+('Camiri'),
+('Yapacaní'),
+('San Ignacio de Velasco');
+
+INSERT INTO tipo_establecimiento (nombre, descripcion) VALUES
+('Residencial',   'Viviendas, casas, departamentos y dúplex'),
+('Comercial',     'Tiendas, oficinas, locales comerciales y mercados'),
+('Industrial',    'Plantas industriales, fábricas y depósitos'),
+('Institucional', 'Clínicas, hospitales y organismos públicos'),
+('Educativo',     'Colegios, universidades e institutos');
+
+INSERT INTO tipo_sistema (nombre, descripcion) VALUES
+('Sistema de Videovigilancia', 'CCTV con cámaras IP o analógicas y grabador'),
+('Sistema de Alarmas',         'Central de alarma con sensores perimetrales e interiores'),
+('Control de Acceso',          'Biométricos, lectores RFID y cerraduras electromagnéticas'),
+('Cerco Eléctrico',            'Perímetro de seguridad con cable acerado energizado'),
+('Domótica',                   'Automatización y control inteligente del hogar o edificio'),
+('Videoportero',               'Sistema de intercomunicación con video en puerta de entrada'),
+('Sistema Integrado',          'Combinación de videovigilancia, alarma y control de acceso');
+
+-- ============================================================
+-- CATÁLOGO DE PRODUCTOS
+-- ============================================================
+
+INSERT INTO categoria (nombre, descripcion, estado) VALUES
+('Cámaras IP y Analógicas',  'Cámaras de videovigilancia interiores y exteriores',        TRUE),
+('Grabadores DVR/NVR',       'Grabadores digitales para sistemas CCTV',                   TRUE),
+('Alarmas y Sensores',       'Centrales de alarma, detectores PIR y contactos magnéticos', TRUE),
+('Control de Acceso',        'Biométricos, lectores RFID, cerraduras y botones de salida', TRUE),
+('Cableado y Conectores',    'Cables UTP, coaxial, canaletas y conectores',               TRUE),
+('Energía y UPS',            'Fuentes de alimentación, baterías y UPS',                   TRUE),
+('Cercos Eléctricos',        'Energizadores y cable acerado para cercos perimetrales',    TRUE);
+
+-- proveedor (sin NIT ni razon_social — tabla tiene: nombre, email, direccion, departamento, estado)
+INSERT INTO proveedor (nombre, email, direccion, departamento, estado) VALUES
+('TecnoBolivia',        'ventas@tecnobolivia.com',   'Av. Cañoto 345, local 12',          'Santa Cruz', TRUE),
+('SegTotal',            'pedidos@segtotal.com',      'C/ Sucre 890, piso 1',              'Santa Cruz', TRUE),
+('DigitalCruz',         'compras@digitalcruz.com',   'Av. San Martín 234',                'Santa Cruz', TRUE),
+('AlarmaBolivia',       'info@alarmabolivia.com',    'C/ Libertad 567',                   'Santa Cruz', TRUE),
+('RedElec',             'ventas@redelec.com.bo',     'Av. Alemana Km 3',                  'Santa Cruz', TRUE),
+('CercoElec',           'info@cercoelec.com.bo',     'Carretera a Montero Km 5',          'Santa Cruz', TRUE),
+('NacionalCables',      'pedidos@nacables.com.bo',   'Parque Industrial manzana 7',       'Santa Cruz', TRUE),
+('EnerBolivia',         'ventas@enerbolivia.com',    'Av. Busch 1200',                    'Santa Cruz', TRUE),
+('AccesoIntel',         'ventas@accesointel.com',    'C/ Florida 234',                    'Santa Cruz', TRUE),
+('DomoticaSCZ',         'info@domoticascz.com',      'Av. Cristo Redentor 890, of. 5',    'Santa Cruz', TRUE);
+
+-- telefono (para entidades + proveedores)
+INSERT INTO telefono (numero) VALUES
+('77234561'),  -- 1  empleado 1
+('76345672'),  -- 2  empleado 2
+('72456783'),  -- 3  empleado 3
+('71567894'),  -- 4  empleado 4
+('75678905'),  -- 5  empleado 5
+('69234561'),  -- 6  empleado 6
+('78345672'),  -- 7  empleado 7
+('74456783'),  -- 8  empleado 8
+('73567894'),  -- 9  empleado 9
+('72678905'),  -- 10 empleado 10
+('71789016'),  -- 11 empleado 11
+('70890127'),  -- 12 empleado 12
+('78901238'),  -- 13 empleado 13
+('77012349'),  -- 14 empleado 14
+('76123450'),  -- 15 empleado 15
+('75234561'),  -- 16 cliente 16
+('74345672'),  -- 17 cliente 17
+('73456783'),  -- 18 cliente 18
+('72567894'),  -- 19 cliente 19
+('71678905'),  -- 20 cliente 20
+('70789016'),  -- 21 cliente 21
+('69890127'),  -- 22 cliente 22
+('68901238'),  -- 23 cliente 23
+('77901239'),  -- 24 cliente 24
+('76012340'),  -- 25 cliente 25
+('75123451'),  -- 26 cliente 26 (emp+cli)
+('74234562'),  -- 27 cliente 27 (emp+cli)
+('33221100'),  -- 28 empresa 28
+('33112233'),  -- 29 empresa 29
+('33334455'),  -- 30 empresa 30
+('33445566'),  -- 31 empresa 31
+('33556677'),  -- 32 empresa 32
+('33667788'),  -- 33 empresa 33
+('33778899'),  -- 34 empresa 34
+('33889900'),  -- 35 empresa 35
+('78110011'),  -- 36 proveedor 1 TecnoBolivia
+('77221122'),  -- 37 proveedor 2 SegTotal
+('76332233'),  -- 38 proveedor 3 DigitalCruz
+('75443344'),  -- 39 proveedor 4 AlarmaBolivia
+('74554455'),  -- 40 proveedor 5 RedElec
+('73665566'),  -- 41 proveedor 6 CercoElec
+('72776677'),  -- 42 proveedor 7 NacionalCables
+('71887788'),  -- 43 proveedor 8 EnerBolivia
+('70998899'),  -- 44 proveedor 9 AccesoIntel
+('69009900');  -- 45 proveedor 10 DomoticaSCZ
+
+-- telefono_proveedor
+INSERT INTO telefono_proveedor (id_telefono, id_proveedor) VALUES
+(36,1),(37,2),(38,3),(39,4),(40,5),
+(41,6),(42,7),(43,8),(44,9),(45,10);
+
+-- producto (codigo obligatorio, sin precio_unitario — eso va en producto_proveedor)
+INSERT INTO producto (id_categoria, codigo, nombre, unidad_medida, descripcion, estado) VALUES
+-- Cámaras (cat 1)
+(1, 'CAM-DOMO-2MP',  'Cámara Domo IP 2MP',         'unidad',  'Cámara domo IP 1080p, visión nocturna 30m, interior',              TRUE),
+(1, 'CAM-BALA-4MP',  'Cámara Bala IP 4MP',          'unidad',  'Cámara bala IP 4MP, visión nocturna 50m, exterior IP67',           TRUE),
+(1, 'CAM-PTZ-2MP',   'Cámara PTZ 2MP',              'unidad',  'Cámara PTZ motorizada, zoom óptico 20x, interior/exterior',        TRUE),
+(1, 'CAM-AHD-2MP',   'Cámara Analógica HD 2MP',     'unidad',  'Cámara AHD 1080p, domo, visión nocturna 20m',                     TRUE),
+(1, 'CAM-FISH-4MP',  'Cámara Fisheye 360° 4MP',     'unidad',  'Cámara ojo de pez 4MP, cobertura 360°, montaje techo',            TRUE),
+-- Grabadores (cat 2)
+(2, 'NVR-8CH-4K',    'NVR 8 canales 4K',            'unidad',  'Grabador de red 8ch, resolución 4K, 1 HDD, H.265+',               TRUE),
+(2, 'NVR-16CH-4K',   'NVR 16 canales 4K',           'unidad',  'Grabador de red 16ch, resolución 4K, 2 HDD, H.265+',              TRUE),
+(2, 'DVR-4CH-FHD',   'DVR 4 canales Full HD',       'unidad',  'Grabador analógico 4ch, 1080p, 1 HDD, acceso remoto',             TRUE),
+(2, 'DVR-8CH-FHD',   'DVR 8 canales Full HD',       'unidad',  'Grabador analógico 8ch, 1080p, 1 HDD, acceso remoto',             TRUE),
+(2, 'HDD-VIGIL-2TB', 'HDD Vigilancia 2TB',          'unidad',  'Disco duro para CCTV, funcionamiento 24/7, SATA',                 TRUE),
+-- Alarmas y sensores (cat 3)
+(3, 'PAN-ALARM-8Z',  'Panel de Alarma 8 zonas',     'unidad',  'Central de alarma 8 zonas cableadas, comunicación GSM',           TRUE),
+(3, 'PAN-ALARM-16Z', 'Panel de Alarma 16 zonas',    'unidad',  'Central de alarma 16 zonas, cableada + inalámbrica, GSM/IP',      TRUE),
+(3, 'SEN-PIR-DT',    'Sensor PIR doble tecnología', 'unidad',  'Detector de movimiento PIR + microondas, 12m',                    TRUE),
+(3, 'SEN-MAG-PV',    'Sensor magnético puerta',     'unidad',  'Contacto magnético para puertas y ventanas, NO/NC',               TRUE),
+(3, 'SIR-EXT-110',   'Sirena exterior 110dB',       'unidad',  'Sirena autoprotegida para exterior, 110dB, flash LED',            TRUE),
+-- Control de acceso (cat 4)
+(4, 'LEC-HUE-RFID',  'Lector huella + RFID',        'unidad',  'Control acceso biométrico, huella + tarjeta, 500 usuarios',       TRUE),
+(4, 'CER-ELEC-600',  'Cerradura electromagnética',  'unidad',  'Cerradura electromagnética 600lb, fail-safe, con sensor',         TRUE),
+(4, 'LEC-RFID-125',  'Lector RFID 125kHz',          'unidad',  'Lector de tarjetas de proximidad, Wiegand 26/34',                 TRUE),
+(4, 'TAR-RFID-X10',  'Tarjetas RFID (paquete x10)', 'paquete', 'Tarjetas de proximidad 125kHz imprimibles, x10',                  TRUE),
+(4, 'BOT-SAL-NC',    'Botón de salida sin voltaje',  'unidad',  'Pulsador de salida de emergencia, NO/NC, empotrable',             TRUE),
+-- Cableado (cat 5)
+(5, 'CAB-UTP-CAT6',  'Cable UTP Cat6 (caja 305m)',  'caja',    'Cable UTP Cat6 CCA, 305m, para redes e interconexión',            TRUE),
+(5, 'CAB-COA-RG59',  'Cable coaxial RG59 (caja)',   'caja',    'Cable coaxial RG59 + alimentación, 305m, CCTV analógico',         TRUE),
+(5, 'CON-RJ45-X50',  'Conector RJ45 (bolsa x50)',   'bolsa',   'Conectores RJ45 Cat6, x50',                                       TRUE),
+(5, 'CON-BNC-X10',   'Conector BNC macho (x10)',    'bolsa',   'Conectores BNC a presión para RG59, x10',                        TRUE),
+(5, 'CAN-40X25-2M',  'Canaleta 40x25mm (tira 2m)',  'unidad',  'Canaleta PVC blanca con tapa, 40x25mm, 2m',                      TRUE),
+-- Energía (cat 6)
+(6, 'FTE-12V-5A',    'Fuente 12V 5A estabilizada',  'unidad',  'Fuente de alimentación 12VDC 5A, regulada, protección SC',        TRUE),
+(6, 'UPS-1000VA',    'UPS 1000VA',                  'unidad',  'UPS offline 1000VA/600W, 2 salidas, autonomía ~15min',            TRUE),
+(6, 'BAT-12V-7AH',   'Batería 12V 7Ah',             'unidad',  'Batería sellada 12V 7Ah para UPS y paneles de alarma',            TRUE),
+-- Cercos eléctricos (cat 7)
+(7, 'ENE-CERCO-10Z', 'Energizador 10 zonas 10km',  'unidad',  'Energizador de cerco eléctrico 10 zonas, 10.000V, 10km',          TRUE),
+(7, 'CAB-ACERO-100', 'Cable acerado (rollo 100m)',  'rollo',   'Cable acerado galvanizado para cerco eléctrico, 100m',            TRUE);
+
+-- producto_proveedor (precio_unitario en esta tabla, es_principal indica proveedor preferido)
+INSERT INTO producto_proveedor (id_producto, id_proveedor, precio_unitario, es_principal) VALUES
+-- Cámaras
+(1,  1, 480.00, TRUE),  (1,  3, 465.00, FALSE),
+(2,  1, 720.00, TRUE),  (2,  3, 700.00, FALSE),
+(3,  1,2800.00, TRUE),  (3,  3,2750.00, FALSE),
+(4,  3, 220.00, TRUE),  (4,  2, 225.00, FALSE),
+(5,  1, 950.00, TRUE),
+-- Grabadores
+(6,  1,1450.00, TRUE),  (6,  2,1430.00, FALSE),
+(7,  1,2200.00, TRUE),  (7,  2,2180.00, FALSE),
+(8,  2, 680.00, TRUE),  (8,  3, 665.00, FALSE),
+(9,  2, 980.00, TRUE),  (9,  3, 960.00, FALSE),
+(10, 2, 380.00, TRUE),  (10, 7, 370.00, FALSE),
+-- Alarmas
+(11, 4, 850.00, TRUE),  (11, 2, 840.00, FALSE),
+(12, 4,1650.00, TRUE),  (12, 2,1630.00, FALSE),
+(13, 4,  95.00, TRUE),  (13, 2,  93.00, FALSE),
+(14, 4,  35.00, TRUE),
+(15, 4, 180.00, TRUE),  (15, 2, 175.00, FALSE),
+-- Control acceso
+(16, 9, 620.00, TRUE),  (16, 5, 610.00, FALSE),
+(17, 9, 350.00, TRUE),  (17, 5, 340.00, FALSE),
+(18, 9, 180.00, TRUE),
+(19, 9,  45.00, TRUE),
+(20, 9,  28.00, TRUE),
+-- Cableado
+(21, 7, 380.00, TRUE),
+(22, 7, 320.00, TRUE),
+(23, 7,  25.00, TRUE),
+(24, 7,  18.00, TRUE),
+(25, 7,  22.00, TRUE),
+-- Energía
+(26, 8, 120.00, TRUE),
+(27, 8, 780.00, TRUE),
+(28, 8,  95.00, TRUE),
+-- Cercos
+(29, 6,1200.00, TRUE),
+(30, 6,  85.00, TRUE);
+
+-- ============================================================
+-- MÓDULO 1: ENTIDADES
+-- ============================================================
+
+-- entidad (nombre, tipo, email, cliente, empleado, estado)
+INSERT INTO entidad (nombre, tipo, email, cliente, empleado, estado) VALUES
+-- Empleados (no clientes) — ids 1-15
+('Carlos Alberto Mendoza Ríos',    'natural', 'c.mendoza@servicontrol.com',    FALSE, TRUE,  TRUE),
+('Roberto Flores Gutiérrez',       'natural', 'r.flores@servicontrol.com',     FALSE, TRUE,  TRUE),
+('Miguel Ángel Torrez Salazar',    'natural', 'm.torrez@servicontrol.com',     FALSE, TRUE,  TRUE),
+('Juan Pablo Vargas Montaño',      'natural', 'j.vargas@servicontrol.com',     FALSE, TRUE,  TRUE),
+('Ana María Quispe Mamani',        'natural', 'a.quispe@servicontrol.com',     FALSE, TRUE,  TRUE),
+('Luis Fernando Mamani Condori',   'natural', 'l.mamani@servicontrol.com',     FALSE, TRUE,  TRUE),
+('Diego Martín Rojas Villarroel',  'natural', 'd.rojas@servicontrol.com',      FALSE, TRUE,  TRUE),
+('Fernando Chávez Peredo',         'natural', 'f.chavez@servicontrol.com',     FALSE, TRUE,  TRUE),
+('Paola Daniela Vaca Suárez',      'natural', 'p.vaca@servicontrol.com',       FALSE, TRUE,  TRUE),
+('Sergio Pedraza Antelo',          'natural', 's.pedraza@servicontrol.com',    FALSE, TRUE,  TRUE),
+('Rodrigo Suárez Molina',          'natural', 'r.suarez@servicontrol.com',     FALSE, TRUE,  TRUE),
+('Patricia Medina Soria',          'natural', 'p.medina@servicontrol.com',     FALSE, TRUE,  TRUE),
+('Claudia Ortiz Valdivia',         'natural', 'c.ortiz@servicontrol.com',      FALSE, TRUE,  TRUE),
+('Marco Antonio Ibáñez Caballero', 'natural', 'm.ibanez@servicontrol.com',     FALSE, TRUE,  TRUE),
+('Verónica Arce Chávez',           'natural', 'v.arce@servicontrol.com',       FALSE, TRUE,  TRUE),
+-- Clientes personas naturales — ids 16-25
+('Jorge Luis Gutiérrez Vaca',      'natural', 'jorge.gutierrez@gmail.com',     TRUE,  FALSE, TRUE),
+('Sandra Peña Flores',             'natural', 'sandra.pena@gmail.com',         TRUE,  FALSE, TRUE),
+('Oscar Montaño Durán',            'natural', 'oscar.montano@hotmail.com',     TRUE,  FALSE, TRUE),
+('Gabriela Soria Barba',           'natural', 'gabi.soria@gmail.com',          TRUE,  FALSE, TRUE),
+('Ricardo Villca Torrez',          'natural', 'r.villca@gmail.com',            TRUE,  FALSE, TRUE),
+('Natalia Cruz Pedraza',           'natural', 'natalia.cruz@gmail.com',        TRUE,  FALSE, TRUE),
+('Eduardo Pinto Camacho',          'natural', 'e.pinto@hotmail.com',           TRUE,  FALSE, TRUE),
+('Carla Lucía Espinoza Rojas',     'natural', 'carla.espinoza@gmail.com',      TRUE,  FALSE, TRUE),
+('Alejandro Bernal Salinas',       'natural', 'ale.bernal@gmail.com',          TRUE,  FALSE, TRUE),
+('Sofía Aguilar Mendoza',          'natural', 'sofia.aguilar@gmail.com',       TRUE,  FALSE, TRUE),
+-- Empleados que también son clientes — ids 26-27
+('Héctor Jiménez Padilla',         'natural', 'h.jimenez@servicontrol.com',    TRUE,  TRUE,  TRUE),
+('Liliana Cortez Vargas',          'natural', 'l.cortez@servicontrol.com',     TRUE,  TRUE,  TRUE),
+-- Clientes personas jurídicas — ids 28-35
+('Comercial El Prado',             'juridica','admin@elprado.com.bo',          TRUE,  FALSE, TRUE),
+('Farmacia San Martín',            'juridica','admin@farmaciasanmartin.com',   TRUE,  FALSE, TRUE),
+('Supermercado Los Andes',         'juridica','gerencia@losandes.com.bo',      TRUE,  FALSE, TRUE),
+('Acopio Warnes S.A.',             'juridica','admin@acopi owarnes.com.bo',    TRUE,  FALSE, TRUE),
+('Industrias Montero S.R.L.',      'juridica','admin@indmontero.com.bo',       TRUE,  FALSE, TRUE),
+('Clínica Santa Rosa',             'juridica','admin@clinicasantarosa.com',    TRUE,  FALSE, TRUE),
+('Colegio Boliviano Japonés',      'juridica','direccion@colegiobj.edu.bo',    TRUE,  FALSE, TRUE),
+('Hotel Las Palmas',               'juridica','recepcion@laspalmas.com.bo',    TRUE,  FALSE, TRUE);
+
+-- entidad_natural (id_entidad, ci, sexo, fecha_nacimiento)
+INSERT INTO entidad_natural (id_entidad, ci, sexo, fecha_nacimiento) VALUES
+(1,  '5234891', 'M', '1985-03-12'),
+(2,  '6123450', 'M', '1990-07-22'),
+(3,  '7234512', 'M', '1988-11-05'),
+(4,  '6890123', 'M', '1992-04-18'),
+(5,  '7456789', 'F', '1993-08-30'),
+(6,  '5678901', 'M', '1986-01-25'),
+(7,  '8123456', 'M', '1994-06-14'),
+(8,  '7890123', 'M', '1991-09-03'),
+(9,  '8456789', 'F', '1995-12-20'),
+(10, '6345678', 'M', '1989-02-08'),
+(11, '8901234', 'M', '1996-05-17'),
+(12, '7012345', 'F', '1990-10-29'),
+(13, '9123456', 'F', '1997-03-07'),
+(14, '5890123', 'M', '1984-08-16'),
+(15, '6789012', 'F', '1987-11-24'),
+(16, '5123789', 'M', '1978-04-05'),
+(17, '6234890', 'F', '1982-09-13'),
+(18, '7345901', 'M', '1975-12-22'),
+(19, '8456012', 'F', '1988-06-30'),
+(20, '5567123', 'M', '1980-01-18'),
+(21, '6678234', 'F', '1985-07-09'),
+(22, '7789345', 'M', '1979-11-27'),
+(23, '8890456', 'F', '1990-03-15'),
+(24, '5901567', 'M', '1983-08-04'),
+(25, '7012678', 'F', '1991-05-21'),
+(26, '6123789', 'M', '1987-10-10'),
+(27, '8234890', 'F', '1993-02-28');
+
+-- entidad_juridica (id_entidad, nit, nombre_comercial, razon_social)
+INSERT INTO entidad_juridica (id_entidad, nit, nombre_comercial, razon_social) VALUES
+(28, '1023456789', 'Comercial El Prado',     'Comercial El Prado S.R.L.'),
+(29, '2034567890', 'Farmacia San Martín',    'Farmacia San Martín Unipersonal'),
+(30, '3045678901', 'Los Andes',              'Supermercado Los Andes S.A.'),
+(31, '4056789012', 'Acopio Warnes',          'Acopio Warnes S.A.'),
+(32, '5067890123', 'Industrias Montero',     'Industrias Montero S.R.L.'),
+(33, '6078901234', 'Clínica Santa Rosa',     'Clínica Santa Rosa S.R.L.'),
+(34, '7089012345', 'Col. Boliviano Japonés', 'Colegio Boliviano Japonés S.R.L.'),
+(35, '8090123456', 'Hotel Las Palmas',       'Hotel Las Palmas S.A.');
+
+-- telefono_entidad
+INSERT INTO telefono_entidad (id_telefono, id_entidad) VALUES
+(1,1),(2,2),(3,3),(4,4),(5,5),(6,6),(7,7),(8,8),(9,9),(10,10),
+(11,11),(12,12),(13,13),(14,14),(15,15),(16,16),(17,17),(18,18),
+(19,19),(20,20),(21,21),(22,22),(23,23),(24,24),(25,25),(26,26),
+(27,27),(28,28),(29,29),(30,30),(31,31),(32,32),(33,33),(34,34),(35,35);
+
+-- ============================================================
+-- MÓDULO 1: EMPLEADOS Y CARGOS
+-- ============================================================
+
+INSERT INTO cargo (nombre, descripcion) VALUES
+('Gerente General',         'Responsable de la gestión integral de la empresa'),
+('Técnico Instalador',      'Realiza instalaciones de sistemas de seguridad'),
+('Técnico de Campo',        'Ejecuta tareas asignadas en sitio del cliente'),
+('Coordinador de Proyectos','Planifica y supervisa proyectos de instalación'),
+('Atención al Cliente',     'Gestiona la relación y comunicación con clientes'),
+('Auxiliar Administrativo', 'Apoyo administrativo y gestión documental');
+
+-- empleado (id, id_entidad, id_cargo, estado, fecha_creacion)
+-- NO tiene fecha_ingreso — columna es fecha_creacion DATETIME DEFAULT
+INSERT INTO empleado (id_entidad, id_cargo, estado) VALUES
+(1,  1, TRUE),   -- 1  Carlos Mendoza - Gerente
+(14, 4, TRUE),   -- 2  Marco Ibáñez - Coordinador
+(6,  4, TRUE),   -- 3  Luis Mamani - Coordinador
+(15, 4, TRUE),   -- 4  Verónica Arce - Coordinadora
+(5,  5, TRUE),   -- 5  Ana Quispe - Atención
+(12, 5, TRUE),   -- 6  Patricia Medina - Atención
+(13, 6, TRUE),   -- 7  Claudia Ortiz - Aux. Admin
+(2,  2, TRUE),   -- 8  Roberto Flores - Técnico Instalador
+(3,  2, TRUE),   -- 9  Miguel Torrez - Técnico Instalador
+(4,  2, TRUE),   -- 10 Juan Vargas - Técnico Instalador
+(7,  3, TRUE),   -- 11 Diego Rojas - Técnico Campo
+(8,  3, TRUE),   -- 12 Fernando Chávez - Técnico Campo
+(10, 3, TRUE),   -- 13 Sergio Pedraza - Técnico Campo
+(11, 3, TRUE),   -- 14 Rodrigo Suárez - Técnico Campo
+(26, 2, TRUE);   -- 15 Héctor Jiménez - Técnico Instalador
+
+INSERT INTO especialidad (nombre, descripcion) VALUES
+('CCTV y Videovigilancia',          'Instalación y configuración de cámaras y grabadores'),
+('Sistemas de Alarmas',             'Instalación de centrales, sensores y sirenas'),
+('Control de Acceso',               'Biométricos, lectores RFID y cerraduras electromagnéticas'),
+('Cercos Eléctricos',               'Instalación de energizadores y cable acerado'),
+('Domótica y Automatización',       'Sistemas de automatización y control inteligente'),
+('Redes y Cableado Estructurado',   'Tendido de cable UTP, coaxial e infraestructura de red');
+
+-- empleado_especialidad
+INSERT INTO empleado_especialidad (id_empleado, id_especialidad) VALUES
+(8,  1), (8,  6),   -- Roberto: CCTV + Redes
+(9,  1), (9,  2),   -- Miguel: CCTV + Alarmas
+(10, 2), (10, 3),   -- Juan: Alarmas + Control Acceso
+(11, 1), (11, 4),   -- Diego: CCTV + Cercos
+(12, 2), (12, 5),   -- Fernando: Alarmas + Domótica
+(13, 3), (13, 6),   -- Sergio: Control Acceso + Redes
+(14, 1), (14, 2),   -- Rodrigo: CCTV + Alarmas
+(15, 3), (15, 4),   -- Héctor: Control Acceso + Cercos
+(2,  1), (2,  2),   -- Marco (coord): CCTV + Alarmas
+(3,  3), (3,  5);   -- Luis (coord): Control Acceso + Domótica
+
+-- ============================================================
+-- MÓDULO 2: AUTENTICACIÓN Y ROLES
+-- ============================================================
+
+INSERT INTO rol (nombre, descripcion) VALUES
+('Administrador',       'Acceso total al sistema'),
+('Técnico Superior',    'Gestiona proyectos y órdenes de trabajo'),
+('Atención al Cliente', 'Registra clientes y gestiona bitácoras'),
+('Técnico de Campo',    'Visualiza y ejecuta sus tareas asignadas');
+
+INSERT INTO permiso (nombre, descripcion) VALUES
+('ver_proyectos',            'Ver listado y detalle de proyectos'),
+('crear_proyectos',          'Crear nuevos proyectos'),
+('editar_proyectos',         'Editar proyectos existentes'),
+('ver_ordenes',              'Ver órdenes de trabajo'),
+('crear_ordenes',            'Crear órdenes de trabajo'),
+('editar_ordenes',           'Editar órdenes de trabajo'),
+('ver_clientes',             'Ver información de clientes'),
+('crear_clientes',           'Registrar nuevos clientes'),
+('editar_clientes',          'Modificar datos de clientes'),
+('ver_reportes',             'Acceder a reportes y estadísticas'),
+('gestionar_usuarios',       'Crear y administrar usuarios del sistema'),
+('gestionar_catalogo',       'Administrar catálogos del sistema'),
+('ver_finanzas',             'Ver pagos, gastos y cuentas por cobrar'),
+('gestionar_finanzas',       'Registrar pagos y gastos'),
+('ver_mantenimientos',       'Ver programación de mantenimientos'),
+('gestionar_mantenimientos', 'Programar y registrar mantenimientos'),
+('ver_cotizaciones',         'Ver cotizaciones'),
+('crear_cotizaciones',       'Crear cotizaciones para clientes');
+
+-- rol_permiso
+-- Administrador: todos
+INSERT INTO rol_permiso (id_rol, id_permiso) VALUES
+(1,1),(1,2),(1,3),(1,4),(1,5),(1,6),(1,7),(1,8),(1,9),(1,10),
+(1,11),(1,12),(1,13),(1,14),(1,15),(1,16),(1,17),(1,18);
+-- Técnico Superior
+INSERT INTO rol_permiso (id_rol, id_permiso) VALUES
+(2,1),(2,2),(2,3),(2,4),(2,5),(2,6),(2,7),(2,10),(2,13),(2,15),(2,16),(2,17),(2,18);
+-- Atención al Cliente
+INSERT INTO rol_permiso (id_rol, id_permiso) VALUES
+(3,1),(3,4),(3,7),(3,8),(3,9),(3,17),(3,18);
+-- Técnico de Campo
+INSERT INTO rol_permiso (id_rol, id_permiso) VALUES
+(4,4),(4,7),(4,15);
+
+-- usuario (id_rol, id_empleado, username, password, email, estado)
+-- password es hash bcrypt de ejemplo
+INSERT INTO usuario (id_rol, id_empleado, username, password, email, estado) VALUES
+(1,  1,  'admin.mendoza',   '$2b$12$xK8L2mN9pQ3rS5tU7vW1yOaHQnKJzXp4RdMcBwEuFgIlVsYtZ0123', 'c.mendoza@servicontrol.com',   TRUE),
+(2,  2,  'marco.ibanez',    '$2b$12$aB3cD5eF7gH9iJ1kL3mN5oP7qR9sT1uV3wX5yZ7aB9cD1eF3gH5iJ', 'm.ibanez@servicontrol.com',    TRUE),
+(2,  3,  'luis.mamani',     '$2b$12$bC4dE6fG8hI0jK2lM4nO6pQ8rS0tU2vW4xY6zA8bC0dE2fG4hI6jK', 'l.mamani@servicontrol.com',    TRUE),
+(3,  5,  'ana.quispe',      '$2b$12$cD5eF7gH9iJ1kL3mN5oP7qR9sT1uV3wX5yZ7aB9cD1eF3gH5iJ7kL', 'a.quispe@servicontrol.com',    TRUE),
+(3,  6,  'patricia.medina', '$2b$12$dE6fG8hI0jK2lM4nO6pQ8rS0tU2vW4xY6zA8bC0dE2fG4hI6jK8lM', 'p.medina@servicontrol.com',    TRUE),
+(4,  8,  'roberto.flores',  '$2b$12$eF7gH9iJ1kL3mN5oP7qR9sT1uV3wX5yZ7aB9cD1eF3gH5iJ7kL9mN', 'r.flores@servicontrol.com',    TRUE),
+(4,  9,  'miguel.torrez',   '$2b$12$fG8hI0jK2lM4nO6pQ8rS0tU2vW4xY6zA8bC0dE2fG4hI6jK8lM0nO', 'm.torrez@servicontrol.com',    TRUE),
+(4,  11, 'diego.rojas',     '$2b$12$gH9iJ1kL3mN5oP7qR9sT1uV3wX5yZ7aB9cD1eF3gH5iJ7kL9mN1oP', 'd.rojas@servicontrol.com',     TRUE),
+(4,  12, 'fernando.chavez', '$2b$12$hI0jK2lM4nO6pQ8rS0tU2vW4xY6zA8bC0dE2fG4hI6jK8lM0nO2pQ', 'f.chavez@servicontrol.com',    TRUE),
+(4,  13, 'sergio.pedraza',  '$2b$12$iJ1kL3mN5oP7qR9sT1uV3wX5yZ7aB9cD1eF3gH5iJ7kL9mN1oP3qR', 's.pedraza@servicontrol.com',   TRUE);
+
+-- ============================================================
+-- MÓDULO 1 (cont.): ESTABLECIMIENTOS Y SISTEMAS
+-- ============================================================
+
+-- establecimiento (id_entidad, id_municipio, id_tipo_establecimiento, direccion, estado)
+-- NO tiene nombre — la tabla solo tiene esas columnas
+INSERT INTO establecimiento (id_entidad, id_municipio, id_tipo_establecimiento, direccion, estado) VALUES
+(16, 1, 1, 'Av. Banzer Km 5, UV 165, Mz 12, Casa 3',          TRUE),   -- 1  Casa Gutiérrez
+(16, 1, 2, 'C/ Andrés Ibáñez 345, Piso 2, Of. 8',             TRUE),   -- 2  Oficina Gutiérrez
+(17, 1, 1, 'Urb. Las Palmas, C/ Los Pinos 23',                 TRUE),   -- 3  Casa Peña
+(18, 1, 2, 'Av. Cristo Redentor 1200, Galpón B',               TRUE),   -- 4  Taller Montaño
+(19, 2, 1, 'B/ Los Almendros, Calle 3 s/n',                    TRUE),   -- 5  Casa Soria Warnes
+(20, 1, 2, 'Mercado Los Pozos, Puesto 45, Nivel 2',            TRUE),   -- 6  Local Villca
+(21, 1, 1, 'Urb. Los Jardines, C/ Magnolias 78',               TRUE),   -- 7  Dúplex Cruz
+(22, 3, 2, 'Av. Busch 890, Montero Centro',                    TRUE),   -- 8  Ferretería Pinto
+(23, 1, 2, 'C.C. Las Brisas, Local 112',                       TRUE),   -- 9  Boutique Espinoza
+(24, 1, 1, 'Urb. Equipetrol Norte, C/ 15 Este 234',            TRUE),   -- 10 Casa Bernal
+(25, 4, 1, 'B/ El Mirador, Calle Principal 56',                TRUE),   -- 11 Casa Aguilar La Guardia
+(26, 1, 2, 'Av. Tres Pasos al Frente 2340',                    TRUE),   -- 12 Taller Jiménez
+(27, 1, 1, 'Urb. Villa 1ro de Mayo, C/ 4 s/n',                 TRUE),   -- 13 Casa Cortez
+(28, 1, 2, 'Av. El Trompillo 567, local 3',                    TRUE),   -- 14 Comercial El Prado
+(29, 1, 2, 'C/ Murillo 234 esq. España',                       TRUE),   -- 15 Farmacia Matriz
+(29, 1, 2, 'Av. Roca y Coronado 890',                          TRUE),   -- 16 Farmacia Sucursal
+(30, 1, 3, 'Av. Alemana Km 2.5',                               TRUE),   -- 17 Supermercado Los Andes
+(31, 2, 3, 'Carretera a Montero Km 8',                         TRUE),   -- 18 Acopio Warnes
+(33, 1, 4, 'C/ Florida 345 esq. Libertad',                     TRUE),   -- 19 Clínica Santa Rosa
+(34, 1, 5, 'Av. Virgen de Cotoca Km 3',                        TRUE);   -- 20 Colegio Bol. Japonés
+
+-- sistema (id_establecimiento, id_tipo_sistema, nombre, tiene_mantenimiento, periodicidad_dias, estado)
+INSERT INTO sistema (id_establecimiento, id_tipo_sistema, nombre, tiene_mantenimiento, periodicidad_dias, estado) VALUES
+(1,  1, 'CCTV 8 cámaras casa Gutiérrez',                        TRUE,  180,  TRUE),   -- 1
+(2,  3, 'Control de acceso oficina Gutiérrez',                   TRUE,  365,  TRUE),   -- 2
+(3,  2, 'Alarma perimetral casa Peña',                           TRUE,  365,  TRUE),   -- 3
+(4,  4, 'Cerco eléctrico taller Montaño 80m',                    TRUE,  180,  TRUE),   -- 4
+(4,  1, 'CCTV 4 cámaras interior taller Montaño',               FALSE, NULL, TRUE),   -- 5
+(5,  2, 'Alarma doméstica casa Soria Warnes',                    TRUE,  365,  TRUE),   -- 6
+(6,  1, 'CCTV 6 cámaras mercado Villca',                         TRUE,  180,  TRUE),   -- 7
+(7,  6, 'Videoportero dúplex Cruz',                              FALSE, NULL, TRUE),   -- 8
+(8,  1, 'CCTV 4 cámaras ferretería Pinto',                       TRUE,  180,  TRUE),   -- 9
+(8,  3, 'Control de acceso bodega Pinto',                        TRUE,  365,  TRUE),   -- 10
+(9,  1, 'CCTV 6 cámaras boutique Espinoza',                      TRUE,  180,  TRUE),   -- 11
+(10, 2, 'Alarma GSM casa Bernal',                                TRUE,  365,  TRUE),   -- 12
+(12, 4, 'Cerco eléctrico taller Jiménez 120m',                   TRUE,  180,  TRUE),   -- 13
+(12, 1, 'CCTV 4 cámaras taller Jiménez',                         FALSE, NULL, TRUE),   -- 14
+(14, 7, 'Sistema integrado Comercial El Prado',                  TRUE,  180,  TRUE),   -- 15
+(15, 1, 'CCTV 8 cámaras farmacia matriz',                        TRUE,  180,  TRUE),   -- 16
+(16, 1, 'CCTV 4 cámaras farmacia sucursal',                      FALSE, NULL, TRUE),   -- 17
+(17, 7, 'Sistema integrado supermercado Los Andes',              TRUE,  90,   TRUE),   -- 18
+(18, 4, 'Cerco eléctrico industrial Acopio Warnes 300m',         TRUE,  180,  TRUE),   -- 19
+(18, 1, 'CCTV 10 cámaras exterior Acopio Warnes',               TRUE,  180,  TRUE),   -- 20
+(19, 3, 'Control de acceso 4 puertas clínica Santa Rosa',        TRUE,  180,  TRUE),   -- 21
+(19, 1, 'CCTV 16 cámaras clínica Santa Rosa',                    TRUE,  180,  TRUE),   -- 22
+(20, 1, 'CCTV 12 cámaras colegio Boliviano Japonés',             TRUE,  180,  TRUE),   -- 23
+(20, 2, 'Alarma área administrativa colegio',                    FALSE, NULL, TRUE),   -- 24
+(11, 1, 'CCTV 4 cámaras casa Aguilar La Guardia',               TRUE,  365,  TRUE);   -- 25
+
+-- ============================================================
+-- CATÁLOGOS PARA PROYECTOS Y ÓRDENES
+-- ============================================================
+
+INSERT INTO servicio (nombre, descripcion, precio) VALUES
+('Instalación',     'Instalación completa de sistema de seguridad',              2500.00),
+('Mantenimiento',   'Mantenimiento preventivo programado',                        450.00),
+('Ampliación',      'Ampliación o extensión de sistema existente',               1500.00),
+('Correctivo',      'Reparación y corrección de fallas en sistema',               600.00),
+('Asesoría técnica','Visita técnica de evaluación y diagnóstico',                 200.00),
+('Migración',       'Migración de sistema analógico a IP o tecnología superior', 3500.00);
+
+INSERT INTO estado_proyecto (nombre, orden) VALUES
+('Levantamiento', 1),
+('Cotizado',      2),
+('Aprobado',      3),
+('En Ejecución',  4),
+('Detenido',      5),
+('Bloqueado',     6),
+('Completado',    7),
+('En Garantía',   8),
+('Cerrado',       9),
+('Cancelado',     10);
+
+INSERT INTO estado_orden (nombre, orden) VALUES
+('Creada',     1),
+('Asignada',   2),
+('En Camino',  3),
+('Iniciada',   4),
+('En Pausa',   5),
+('Completada', 6),
+('Validada',   7),
+('Cancelada',  8);
+
+-- ============================================================
+-- MÓDULO 3: COTIZACIONES
+-- cotizacion: codigo, id_entidad, id_servicio, id_usuario,
+--             id_sistema, estado, subtotal_productos,
+--             mano_de_obra, vigencia_dias, observacion
+-- ============================================================
+
+INSERT INTO cotizacion (codigo, id_entidad, id_servicio, id_usuario, id_sistema, estado, subtotal_productos, mano_de_obra, vigencia_dias, observacion) VALUES
+('COT-2023-001', 16, 1, 4, 1,  'aprobada',  6850.00, 2500.00, 30, 'CCTV 8 cámaras domo IP + NVR 16ch Casa Gutiérrez'),
+('COT-2022-008', 17, 1, 4, 3,  'aprobada',  3280.00, 2500.00, 30, 'Alarma 16 zonas + sensores PIR y magnéticos Casa Peña'),
+('COT-2022-006', 18, 1, 4, 4,  'aprobada',  4250.00, 2500.00, 30, 'Cerco eléctrico 80m taller Montaño'),
+('COT-2022-004', 22, 1, 4, 9,  'aprobada',  2840.00, 2500.00, 30, 'CCTV 4 cámaras bala exterior + DVR 8ch ferretería Pinto'),
+('COT-2023-005', 18, 3, 4, 5,  'aprobada',  1860.00, 1500.00, 30, 'Ampliación CCTV taller Montaño: 2 cámaras extra'),
+('COT-2021-011', 29, 1, 4, 16, 'aprobada',  9200.00, 2500.00, 30, 'CCTV 8 cámaras + alarma integrada farmacia matriz'),
+('COT-2021-006', 30, 1, 4, 18, 'aprobada', 32500.00, 3500.00, 30, 'Sistema integrado 20 cámaras + control acceso + alarma Los Andes'),
+('COT-2022-009', 28, 1, 4, 15, 'aprobada', 18500.00, 3500.00, 30, 'Sistema integrado CCTV 12c + alarma + control acceso El Prado'),
+('COT-2022-007', 33, 1, 4, 21, 'aprobada',  7800.00, 2500.00, 30, 'Control acceso 4 puertas clínica Santa Rosa'),
+('COT-2022-007B',33, 1, 4, 22, 'aprobada', 15600.00, 2500.00, 30, 'CCTV 16 cámaras clínica Santa Rosa'),
+('COT-2022-002', 31, 1, 4, 19, 'aprobada', 12800.00, 2500.00, 30, 'Cerco eléctrico 300m industrial Acopio Warnes'),
+('COT-2023-002', 20, 1, 4, 7,  'aprobada',  3960.00, 2500.00, 30, 'CCTV 6 cámaras mercado Villca'),
+('COT-2023-004', 23, 1, 4, 11, 'aprobada',  3960.00, 2500.00, 30, 'CCTV 6 cámaras boutique Espinoza'),
+('COT-2023-006', 24, 1, 4, 12, 'aprobada',  2580.00, 2500.00, 30, 'Alarma GSM con sensores casa Bernal'),
+('COT-2023-012', 34, 1, 4, 23, 'aprobada',  9600.00, 2500.00, 30, 'CCTV 12 cámaras colegio Boliviano Japonés'),
+('COT-2024-003', 26, 1, 4, 13, 'aprobada',  5800.00, 2500.00, 30, 'Cerco 120m + CCTV 4 cámaras taller Jiménez'),
+('COT-2024-004', 25, 1, 4, 25, 'aprobada',  1920.00, 2500.00, 30, 'CCTV 4 cámaras doméstico casa Aguilar La Guardia'),
+('COT-2023-010', 16, 2, 4, 1,  'aprobada',   450.00,  450.00, 15, 'Mantenimiento preventivo CCTV casa Gutiérrez'),
+('COT-2022-011', 29, 2, 4, 16, 'aprobada',   450.00,  450.00, 15, 'Mantenimiento preventivo farmacia San Martín'),
+('COT-2024-020', 16, 1, 4, 2,  'borrador',  2800.00, 2500.00, 30, 'Control acceso oficina Gutiérrez — pendiente aprobación');
+
+-- cotizacion_detalle: id_cotizacion, id_producto, id_proveedor,
+--                     cantidad, precio_unitario, subtotal, observacion
+INSERT INTO cotizacion_detalle (id_cotizacion, id_producto, id_proveedor, cantidad, precio_unitario, subtotal, observacion) VALUES
+-- COT 1: CCTV 8c Casa Gutiérrez
+(1,  1,  1,  8.00, 480.00, 3840.00, NULL),
+(1,  7,  1,  1.00,2200.00, 2200.00, NULL),
+(1,  10, 2,  1.00, 380.00,  380.00, NULL),
+(1,  21, 7,  1.00, 380.00,  380.00, NULL),
+(1,  26, 8,  1.00, 120.00,  120.00, NULL),
+-- COT 2: Alarma Casa Peña
+(2,  12, 4,  1.00,1650.00, 1650.00, NULL),
+(2,  13, 4,  8.00,  95.00,  760.00, NULL),
+(2,  14, 4, 12.00,  35.00,  420.00, NULL),
+(2,  15, 4,  1.00, 180.00,  180.00, NULL),
+(2,  28, 8,  1.00,  95.00,   95.00, NULL),
+-- COT 3: Cerco Montaño
+(3,  29, 6,  1.00,1200.00, 1200.00, NULL),
+(3,  30, 6,  3.00,  85.00,  255.00, NULL),
+(3,  26, 8,  1.00, 120.00,  120.00, NULL),
+-- COT 4: CCTV Ferretería Pinto
+(4,  2,  1,  4.00, 720.00, 2880.00, NULL),
+(4,  9,  2,  1.00, 980.00,  980.00, NULL),
+(4,  10, 2,  1.00, 380.00,  380.00, NULL),
+(4,  22, 7,  1.00, 320.00,  320.00, NULL),
+-- COT 5: Ampliación Montaño
+(5,  1,  1,  2.00, 480.00,  960.00, NULL),
+(5,  25, 7,  3.00,  22.00,   66.00, NULL),
+(5,  21, 7,  1.00, 380.00,  380.00, NULL),
+-- COT 6: CCTV+Alarma Farmacia Matriz
+(6,  1,  1,  8.00, 480.00, 3840.00, NULL),
+(6,  6,  1,  1.00,1450.00, 1450.00, NULL),
+(6,  11, 4,  1.00, 850.00,  850.00, NULL),
+(6,  13, 4,  4.00,  95.00,  380.00, NULL),
+(6,  10, 2,  1.00, 380.00,  380.00, NULL),
+-- COT 7: Sistema integrado Los Andes
+(7,  2,  1, 20.00, 720.00,14400.00, NULL),
+(7,  7,  1,  2.00,2200.00, 4400.00, NULL),
+(7,  10, 2,  2.00, 380.00,  760.00, NULL),
+(7,  12, 4,  1.00,1650.00, 1650.00, NULL),
+(7,  16, 9,  2.00, 620.00, 1240.00, NULL),
+(7,  17, 9,  2.00, 350.00,  700.00, NULL),
+(7,  21, 7,  2.00, 380.00,  760.00, NULL),
+-- COT 8: Sistema integrado El Prado
+(8,  2,  1, 12.00, 720.00, 8640.00, NULL),
+(8,  7,  1,  1.00,2200.00, 2200.00, NULL),
+(8,  10, 2,  2.00, 380.00,  760.00, NULL),
+(8,  11, 4,  1.00, 850.00,  850.00, NULL),
+(8,  16, 9,  1.00, 620.00,  620.00, NULL),
+(8,  21, 7,  1.00, 380.00,  380.00, NULL),
+-- COT 9: Control acceso Clínica (4 puertas)
+(9,  16, 9,  4.00, 620.00, 2480.00, NULL),
+(9,  17, 9,  4.00, 350.00, 1400.00, NULL),
+(9,  18, 9,  4.00, 180.00,  720.00, NULL),
+(9,  19, 9,  4.00,  45.00,  180.00, NULL),
+(9,  20, 9,  4.00,  28.00,  112.00, NULL),
+-- COT 10: CCTV 16c Clínica
+(10, 2,  1, 16.00, 720.00,11520.00, NULL),
+(10, 7,  1,  1.00,2200.00, 2200.00, NULL),
+(10, 10, 2,  2.00, 380.00,  760.00, NULL),
+(10, 21, 7,  2.00, 380.00,  760.00, NULL),
+-- COT 11: Cerco industrial Acopio Warnes
+(11, 29, 6,  1.00,1200.00, 1200.00, NULL),
+(11, 30, 6, 12.00,  85.00, 1020.00, NULL),
+(11, 26, 8,  2.00, 120.00,  240.00, NULL),
+-- COT 12: CCTV Mercado Villca
+(12, 1,  1,  6.00, 480.00, 2880.00, NULL),
+(12, 7,  1,  1.00,2200.00, 2200.00, NULL),
+(12, 10, 2,  1.00, 380.00,  380.00, NULL),
+-- COT 13: CCTV Boutique Espinoza
+(13, 1,  1,  6.00, 480.00, 2880.00, NULL),
+(13, 6,  1,  1.00,1450.00, 1450.00, NULL),
+(13, 10, 2,  1.00, 380.00,  380.00, NULL),
+-- COT 14: Alarma Casa Bernal
+(14, 12, 4,  1.00,1650.00, 1650.00, NULL),
+(14, 13, 4,  6.00,  95.00,  570.00, NULL),
+(14, 28, 8,  1.00,  95.00,   95.00, NULL),
+-- COT 15: CCTV 12c Colegio
+(15, 2,  1, 12.00, 720.00, 8640.00, NULL),
+(15, 7,  1,  1.00,2200.00, 2200.00, NULL),
+(15, 10, 2,  1.00, 380.00,  380.00, NULL),
+-- COT 16: Cerco+CCTV Taller Jiménez
+(16, 29, 6,  1.00,1200.00, 1200.00, NULL),
+(16, 30, 6,  4.00,  85.00,  340.00, NULL),
+(16, 2,  1,  4.00, 720.00, 2880.00, NULL),
+(16, 9,  2,  1.00, 980.00,  980.00, NULL),
+-- COT 17: CCTV 4c Casa Aguilar
+(17, 1,  1,  4.00, 480.00, 1920.00, NULL),
+-- COT 18: Mantenimiento Casa Gutiérrez (sin detalle de producto)
+-- COT 19: Mantenimiento Farmacia (sin detalle de producto)
+-- COT 20: Control acceso oficina Gutiérrez (borrador)
+(20, 16, 9,  2.00, 620.00, 1240.00, NULL),
+(20, 17, 9,  2.00, 350.00,  700.00, NULL),
+(20, 18, 9,  2.00, 180.00,  360.00, NULL);
+
+-- ============================================================
+-- MÓDULO 4: PROYECTOS
+-- proyecto: codigo, id_entidad, id_establecimiento, id_servicio,
+--           id_estado_proyecto, id_usuario, id_cotizacion,
+--           id_sistema, titulo, descripcion, fecha_inicio, fecha_fin
+-- ============================================================
+
+INSERT INTO proyecto (codigo, id_entidad, id_establecimiento, id_servicio, id_estado_proyecto, id_usuario, id_cotizacion, id_sistema, titulo, descripcion, fecha_inicio, fecha_fin) VALUES
+('PROJ-2023-001', 16, 1,  1, 9,  2, 1,  1,  'Instalación CCTV Casa Gutiérrez',           'CCTV 8 cámaras domo + NVR 16ch',                       '2023-03-01', '2023-03-20'),
+('PROJ-2022-008', 17, 3,  1, 9,  2, 2,  3,  'Instalación Alarma Casa Peña',              'Alarma 16 zonas sensores PIR y magnéticos',             '2022-11-01', '2022-11-15'),
+('PROJ-2022-006', 18, 4,  1, 9,  2, 3,  4,  'Cerco Eléctrico Taller Montaño',            'Cerco eléctrico 80m con energizador 10 zonas',         '2022-08-01', '2022-08-20'),
+('PROJ-2022-004', 22, 8,  1, 9,  2, 4,  9,  'CCTV Ferretería Pinto Montero',             'CCTV 4 cámaras bala exterior + DVR 8ch',               '2022-05-01', '2022-05-18'),
+('PROJ-2023-005', 18, 4,  3, 9,  2, 5,  5,  'Ampliación CCTV Taller Montaño',            'Ampliación a 6 cámaras total',                         '2023-05-15', '2023-06-01'),
+('PROJ-2021-011', 29, 15, 1, 7,  2, 6,  16, 'CCTV + Alarma Farmacia San Martín Matriz',  'Sistema integrado CCTV 8c + alarma',                   '2021-11-01', '2021-12-10'),
+('PROJ-2021-006', 30, 17, 1, 7,  2, 7,  18, 'Sistema Integrado Los Andes',               'Sistema 20 cámaras + control acceso + alarma',         '2021-06-01', '2021-08-30'),
+('PROJ-2022-009', 28, 14, 1, 7,  2, 8,  15, 'Sistema Integrado Comercial El Prado',      'CCTV 12c + alarma + control de acceso',                '2022-09-01', '2022-10-20'),
+('PROJ-2022-007', 33, 19, 1, 8,  2, 9,  21, 'Control Acceso Clínica Santa Rosa',         'Control acceso 4 puertas en garantía',                 '2022-07-01', '2022-07-30'),
+('PROJ-2022-007B',33, 19, 1, 8,  2, 10, 22, 'CCTV Clínica Santa Rosa',                   'CCTV 16 cámaras en garantía',                          '2022-07-01', '2022-08-15'),
+('PROJ-2022-002', 31, 18, 1, 9,  2, 11, 19, 'Cerco Industrial Acopio Warnes',            'Cerco eléctrico 300m industrial',                      '2022-03-01', '2022-04-15'),
+('PROJ-2022-005', 22, 8,  1, 9,  2, NULL,10, 'Control Acceso Bodega Pinto',              'Control acceso bodega central',                        '2022-05-18', '2022-06-10'),
+('PROJ-2023-002', 20, 6,  1, 4,  2, 12, 7,  'CCTV Mercado Villca',                       'En ejecución — pendiente cableado',                    '2023-01-15', NULL),
+('PROJ-2023-004', 23, 9,  1, 4,  2, 13, 11, 'CCTV Boutique Espinoza',                    'Instalación en progreso',                              '2023-04-05', NULL),
+('PROJ-2023-006', 24, 10, 1, 4,  2, 14, 12, 'Alarma Casa Bernal',                        'Esperando sensor PIR en reposición',                   '2023-07-10', NULL),
+('PROJ-2023-012', 34, 20, 1, 4,  2, 15, 23, 'CCTV Colegio Boliviano Japonés',            'Instalación en progreso',                              '2023-11-15', NULL),
+('PROJ-2024-003', 26, 12, 1, 3,  2, 16, 13, 'Cerco + CCTV Taller Jiménez',              'Aprobado, inicio programado',                          '2024-02-15', NULL),
+('PROJ-2024-004', 25, 11, 1, 3,  2, 17, 25, 'CCTV Casa Aguilar La Guardia',             'Aprobado, materiales en pedido',                       '2024-03-25', NULL),
+('PROJ-2023-010', 16, 1,  2, 9,  2, 18, 1,  'Mantenimiento CCTV Casa Gutiérrez',         'Mantenimiento semestral completado',                   '2023-09-15', '2023-09-15'),
+('PROJ-2022-011', 29, 15, 2, 9,  2, 19, 16, 'Mantenimiento Farmacia San Martín',         'Limpieza y calibración preventiva',                    '2022-05-15', '2022-05-15');
+
+-- proyecto_historial: id_proyecto, id_estado_anterior, id_estado_nuevo,
+--                     id_usuario, fecha_cambio, observacion
+
+INSERT INTO proyecto_historial (id_proyecto, id_estado_anterior, id_estado_nuevo, id_usuario, fecha_cambio, observacion) VALUES
+-- Proyecto 1 (Cerrado)
+(1,  NULL, 1, 4, '2023-02-15 09:00:00', 'Visita de levantamiento realizada'),
+(1,  1,    2, 4, '2023-02-20 11:00:00', 'Cotización enviada al cliente'),
+(1,  2,    3, 4, '2023-02-28 15:00:00', 'Cliente aprobó cotización'),
+(1,  3,    4, 2, '2023-03-01 08:00:00', 'Inicio de instalación'),
+(1,  4,    7, 2, '2023-03-20 11:00:00', 'Instalación completada y probada'),
+(1,  7,    9, 1, '2023-04-20 10:00:00', 'Proyecto cerrado formalmente'),
+-- Proyecto 2 (Cerrado)
+(2,  NULL, 1, 4, '2022-10-10 10:00:00', 'Levantamiento en domicilio'),
+(2,  1,    2, 4, '2022-10-15 12:00:00', 'Cotización enviada'),
+(2,  2,    3, 4, '2022-10-28 16:00:00', 'Aprobada por cliente'),
+(2,  3,    4, 2, '2022-11-01 08:00:00', 'Instalación iniciada'),
+(2,  4,    7, 2, '2022-11-15 13:00:00', 'Completado'),
+(2,  7,    9, 1, '2022-12-15 10:00:00', 'Cerrado'),
+-- Proyecto 7 (Completado con pausa por materiales)
+(7,  NULL, 1, 4, '2021-05-05 09:00:00', 'Levantamiento en supermercado'),
+(7,  1,    2, 4, '2021-05-12 11:00:00', 'Cotización enviada'),
+(7,  2,    3, 4, '2021-05-25 16:00:00', 'Aprobado por gerencia'),
+(7,  3,    4, 2, '2021-06-01 08:00:00', 'Inicio de obras'),
+(7,  4,    5, 2, '2021-07-10 14:00:00', 'Detenido por falta de materiales importados'),
+(7,  5,    4, 2, '2021-07-25 08:00:00', 'Reanudado con materiales alternativos'),
+(7,  4,    7, 2, '2021-08-30 12:00:00', 'Sistema completado y funcional'),
+-- Proyecto 13 (En ejecución)
+(13, NULL, 1, 5, '2023-01-03 10:00:00', 'Levantamiento en el mercado'),
+(13, 1,    2, 4, '2023-01-05 12:00:00', 'Cotización enviada'),
+(13, 2,    3, 4, '2023-01-12 15:00:00', 'Aprobada'),
+(13, 3,    4, 2, '2023-01-15 08:00:00', 'En instalación'),
+-- Proyecto 17 (Aprobado)
+(17, NULL, 1, 5, '2024-01-10 10:00:00', 'Levantamiento realizado'),
+(17, 1,    2, 4, '2024-01-15 11:00:00', 'Cotización enviada'),
+(17, 2,    3, 4, '2024-02-10 16:00:00', 'Aprobado por cliente');
+
+-- ============================================================
+-- MÓDULO 5: ÓRDENES DE TRABAJO
+-- orden_trabajo: codigo, id_proyecto, id_servicio, id_estado_orden,
+--               id_usuario, descripcion, fecha_ejecucion,
+--               tiempo_estimado, observaciones
+-- ============================================================
+
+INSERT INTO orden_trabajo (codigo, id_proyecto, id_servicio, id_estado_orden, id_usuario, descripcion, fecha_ejecucion, tiempo_estimado, observaciones) VALUES
+-- Proyecto 1 (CCTV Casa Gutiérrez - CERRADO)
+('OT-2023-001', 1,  1, 7, 2, 'Instalación de cableado UTP y canaletas',           '2023-03-01', 5,  'Cableado completo primer piso'),
+('OT-2023-002', 1,  1, 7, 2, 'Montaje de cámaras y configuración NVR',            '2023-03-02', 9,  'Todas las cámaras operativas'),
+('OT-2023-003', 1,  1, 7, 2, 'Pruebas finales y entrega al cliente',              '2023-03-20', 2,  'Cliente conforme, firma de acta'),
+-- Proyecto 2 (Alarma Casa Peña - CERRADO)
+('OT-2022-031', 2,  1, 7, 2, 'Instalación panel de alarma y sensores',            '2022-11-01', 7,  'Panel instalado y zonas configuradas'),
+('OT-2022-032', 2,  1, 7, 2, 'Pruebas completas y capacitación al cliente',       '2022-11-15', 3,  'Cliente capacitado en uso del sistema'),
+-- Proyecto 3 (Cerco Montaño - CERRADO)
+('OT-2022-021', 3,  1, 7, 2, 'Instalación postes y cable acerado día 1',          '2022-08-01', 9,  'Mitad del perímetro instalado'),
+('OT-2022-022', 3,  1, 7, 2, 'Instalación postes y cable acerado día 2',          '2022-08-02', 9,  'Perímetro completo'),
+('OT-2022-023', 3,  1, 7, 2, 'Instalación energizador y pruebas eléctricas',      '2022-08-20', 6,  'Sistema eléctrico operativo'),
+-- Proyecto 4 (CCTV Ferretería Pinto - CERRADO)
+('OT-2022-012', 4,  1, 7, 2, 'Instalación completa CCTV en Montero',              '2022-05-10', 9,  'Desplazamiento a Montero, completado en 1 día'),
+('OT-2022-013', 4,  1, 7, 2, 'Revisión y pruebas acceso remoto',                  '2022-05-18', 3,  'App configurada en celular del cliente'),
+-- Proyecto 5 (Ampliación Montaño - CERRADO)
+('OT-2023-014', 5,  3, 7, 2, 'Instalación 2 cámaras adicionales y reconfiguración','2023-05-20', 7, 'NVR existente reconfigurado'),
+-- Proyecto 7 (Los Andes - COMPLETADO)
+('OT-2021-023', 7,  1, 7, 2, 'Instalación cableado estructurado fase 1',          '2021-06-05', 10, 'Cableado perimetral completo'),
+('OT-2021-024', 7,  1, 7, 2, 'Montaje NVRs y cámaras zona cajas',                '2021-06-15', 9,  'Zona cajas y entrada principal cubiertas'),
+('OT-2021-025', 7,  1, 7, 2, 'Montaje cámaras pasillos y depósito',              '2021-06-20', 8,  'Cobertura total del supermercado'),
+('OT-2021-026', 7,  1, 7, 2, 'Instalación control de acceso y alarma',            '2021-07-01', 9,  'Biométricos y cerraduras instalados'),
+('OT-2021-027', 7,  1, 6, 2, 'Pruebas integrales y correcciones',                 '2021-08-20', 7,  'Ajustes finales de configuración'),
+('OT-2021-028', 7,  1, 7, 2, 'Capacitación al personal y entrega formal',         '2021-08-30', 3,  'Entrega con firma de conformidad'),
+-- Proyecto 8 (El Prado - COMPLETADO)
+('OT-2022-034', 8,  1, 7, 2, 'Instalación CCTV 12 cámaras',                       '2022-09-10', 9,  'Cableado y montaje completo'),
+('OT-2022-035', 8,  1, 7, 2, 'Instalación alarma y control de acceso',            '2022-09-20', 8,  'Sistema integrado configurado'),
+('OT-2022-036', 8,  1, 7, 2, 'Pruebas integrales y entrega',                      '2022-10-20', 4,  'Entrega formal con acta'),
+-- Proyecto 9 (Control Acceso Clínica - EN GARANTÍA)
+('OT-2022-026', 9,  1, 7, 2, 'Instalación control acceso 4 puertas',              '2022-07-10', 9,  'Biométricos, cerraduras y cableado'),
+('OT-2022-027', 9,  1, 7, 2, 'Configuración usuarios y pruebas',                  '2022-07-30', 5,  'Base de datos cargada, sistema OK'),
+-- Proyecto 11 (Cerco Acopio Warnes - CERRADO)
+('OT-2022-007', 11, 1, 7, 2, 'Instalación cerco sector norte',                    '2022-03-05', 9,  'Postes y cable sector norte'),
+('OT-2022-008', 11, 1, 7, 2, 'Instalación cerco sectores sur y este',             '2022-03-12', 9,  'Sectores sur y este completos'),
+('OT-2022-009', 11, 1, 7, 2, 'Instalación cerco sector oeste y energizador',      '2022-04-01', 9,  'Cerco completo y energizador instalado'),
+('OT-2022-010', 11, 1, 7, 2, 'Pruebas industriales y capacitación',               '2022-04-15', 4,  'Personal de planta capacitado'),
+-- Proyecto 12 (Control acceso bodega Pinto - CERRADO)
+('OT-2022-014', 12, 1, 7, 2, 'Instalación control acceso bodega',                 '2022-05-25', 8,  'Biométrico y cerradura instalados'),
+('OT-2022-015', 12, 1, 7, 2, 'Configuración y pruebas bodega',                    '2022-06-10', 3,  'Sistema operativo'),
+-- Proyecto 13 (CCTV Mercado Villca - EN EJECUCIÓN)
+('OT-2023-005', 13, 1, 6, 2, 'Instalación cableado y canaletas mercado',          '2023-01-20', 9,  'Cableado concluido'),
+('OT-2023-006', 13, 1, 4, 2, 'Montaje de cámaras y configuración NVR',            '2023-02-05', 8,  'En proceso — pendiente 2 cámaras'),
+-- Proyecto 14 (CCTV Boutique - EN EJECUCIÓN)
+('OT-2023-015', 14, 1, 6, 2, 'Instalación cableado boutique',                     '2023-04-10', 6,  'Cableado terminado'),
+('OT-2023-016', 14, 1, 4, 2, 'Montaje cámaras y configuración NVR',               '2023-04-20', 7,  'Pendiente configuración acceso remoto'),
+-- Proyecto 15 (Alarma Bernal - EN EJECUCIÓN)
+('OT-2023-022', 15, 1, 6, 2, 'Instalación panel alarma y sensores',               '2023-07-15', 7,  'Panel instalado — falta 1 sensor PIR'),
+('OT-2023-023', 15, 1, 1, 2, 'Reposición sensor faltante y pruebas finales',      NULL,         2,  'Esperando stock de sensor PIR'),
+-- Proyecto 16 (CCTV Colegio - EN EJECUCIÓN)
+('OT-2023-041', 16, 1, 6, 2, 'Instalación cableado colegio fase 1',               '2023-11-20', 9,  'Bloque A y entrada principal'),
+('OT-2023-042', 16, 1, 6, 2, 'Instalación cableado colegio fase 2',               '2023-12-05', 9,  'Bloque B y patio central'),
+('OT-2023-043', 16, 1, 4, 2, 'Montaje de cámaras y configuración NVR',            '2024-01-10', 8,  'En proceso'),
+-- Proyecto 19 (Mantenimiento CCTV Gutiérrez - CERRADO)
+('OT-2023-032', 19, 2, 7, 2, 'Mantenimiento preventivo CCTV semestral',           '2023-09-15', 4,  'Limpieza ópticas, revisión NVR — OK'),
+-- Proyecto 20 (Mantenimiento Farmacia - CERRADO)
+('OT-2022-018', 20, 2, 7, 2, 'Mantenimiento preventivo CCTV y alarma',            '2022-05-15', 4,  'Sistema en perfectas condiciones'),
+-- Correctivos ligados a proyectos en garantía
+('OT-2022-040', 6,  4, 7, 2, 'Correctivo: cámara con falla de imagen',            '2022-03-10', 3,  'Cámara defectuosa reemplazada'),
+('OT-2022-050', 9,  4, 7, 2, 'Correctivo: lector biométrico sin respuesta',       '2022-12-05', 3,  'Reset y recarga de firmware'),
+('OT-2022-055', 7,  4, 6, 2, 'Revisión sistema post-corte eléctrico',             '2022-10-20', 6,  'UPS revisado, configuración recuperada');
+
+-- orden_empleado: id_orden_trabajo, id_empleado, es_responsable
+INSERT INTO orden_empleado (id_orden_trabajo, id_empleado, es_responsable) VALUES
+(1,  8,  TRUE),  (1,  9,  FALSE),
+(2,  8,  TRUE),  (2,  9,  FALSE),
+(3,  8,  TRUE),
+(4,  10, TRUE),
+(5,  10, TRUE),
+(6,  12, TRUE),  (6,  15, FALSE),
+(7,  12, TRUE),  (7,  15, FALSE),
+(8,  12, TRUE),
+(9,  8,  TRUE),  (9,  9,  FALSE),  (9,  11, FALSE),
+(10, 8,  TRUE),
+(11, 9,  TRUE),  (11, 11, FALSE),
+(12, 8,  TRUE),  (12, 9,  FALSE),  (12, 11, FALSE),
+(13, 8,  TRUE),  (13, 9,  FALSE),
+(14, 9,  TRUE),  (14, 11, FALSE),  (14, 14, FALSE),
+(15, 10, TRUE),  (15, 13, FALSE),
+(16, 8,  TRUE),  (16, 9,  FALSE),  (16, 10, FALSE),
+(17, 2,  TRUE),  (17, 8,  FALSE),
+(18, 8,  TRUE),  (18, 14, FALSE),
+(19, 10, TRUE),  (19, 13, FALSE),
+(20, 2,  TRUE),  (20, 8,  FALSE),
+(21, 13, TRUE),  (21, 15, FALSE),
+(22, 13, TRUE),
+(23, 12, TRUE),  (23, 15, FALSE),
+(24, 12, TRUE),  (24, 15, FALSE),
+(25, 12, TRUE),  (25, 15, FALSE),
+(26, 3,  TRUE),  (26, 12, FALSE),
+(27, 13, TRUE),  (27, 15, FALSE),
+(28, 13, TRUE),  (28, 15, FALSE),
+(29, 11, TRUE),  (29, 14, FALSE),
+(30, 9,  TRUE),  (30, 14, FALSE),
+(31, 11, TRUE),
+(32, 9,  TRUE),
+(33, 10, TRUE),
+(34, 8,  TRUE),  (34, 9,  FALSE),
+(35, 8,  TRUE),  (35, 9,  FALSE),
+(36, 8,  TRUE),  (36, 14, FALSE),
+(37, 8,  TRUE),
+(38, 8,  TRUE),
+(39, 8,  TRUE),
+(40, 8,  TRUE),
+(41, 8,  TRUE),
+(42, 8,  TRUE);
+
+-- orden_producto: id_orden_trabajo, id_producto, cantidad_asignada,
+--                cantidad_usada, observacion
+INSERT INTO orden_producto (id_orden_trabajo, id_producto, cantidad_asignada, cantidad_usada, observacion) VALUES
+-- OT 1 (cableado Casa Gutiérrez)
+(1,  21, 1.00, 1.00, NULL),
+(1,  25, 8.00, 7.00, NULL),
+(1,  23, 1.00, 1.00, NULL),
+-- OT 2 (montaje cámaras Casa Gutiérrez)
+(2,  1,  8.00, 8.00, NULL),
+(2,  7,  1.00, 1.00, NULL),
+(2,  10, 1.00, 1.00, NULL),
+(2,  26, 1.00, 1.00, NULL),
+-- OT 4 (alarma Casa Peña)
+(4,  12, 1.00, 1.00, NULL),
+(4,  13, 8.00, 8.00, NULL),
+(4,  14,12.00,12.00, NULL),
+(4,  15, 1.00, 1.00, NULL),
+(4,  28, 1.00, 1.00, NULL),
+-- OT 6 (cerco día 1)
+(6,  30, 2.00, 2.00, NULL),
+(6,  25, 5.00, 5.00, NULL),
+-- OT 7 (cerco día 2)
+(7,  30, 1.00, 1.00, NULL),
+-- OT 8 (energizador)
+(8,  29, 1.00, 1.00, NULL),
+(8,  26, 1.00, 1.00, NULL),
+-- OT 9 (Ferretería Pinto Montero)
+(9,  2,  4.00, 4.00, NULL),
+(9,  9,  1.00, 1.00, NULL),
+(9,  10, 1.00, 1.00, NULL),
+(9,  22, 1.00, 1.00, NULL),
+(9,  24, 2.00, 2.00, NULL),
+-- OT 11 (ampliación Montaño)
+(11, 1,  2.00, 2.00, NULL),
+(11, 25, 3.00, 3.00, NULL),
+-- OT 12 (Los Andes cableado fase 1)
+(12, 21, 2.00, 2.00, NULL),
+(12, 25,20.00,18.00, NULL),
+(12, 23, 2.00, 2.00, NULL),
+-- OT 13 (Los Andes zona cajas)
+(13, 2,  8.00, 8.00, NULL),
+(13, 7,  1.00, 1.00, NULL),
+(13, 10, 1.00, 1.00, NULL),
+-- OT 14 (Los Andes pasillos)
+(14, 2, 12.00,12.00, NULL),
+(14, 7,  1.00, 1.00, NULL),
+(14, 10, 1.00, 1.00, NULL),
+(14, 26, 2.00, 2.00, NULL),
+-- OT 15 (Los Andes control acceso + alarma)
+(15, 12, 1.00, 1.00, NULL),
+(15, 13, 6.00, 6.00, NULL),
+(15, 16, 2.00, 2.00, NULL),
+(15, 17, 2.00, 2.00, NULL),
+(15, 18, 2.00, 2.00, NULL),
+(15, 19, 2.00, 2.00, NULL),
+(15, 20, 2.00, 2.00, NULL),
+-- OT 18 (El Prado CCTV)
+(18, 2, 12.00,12.00, NULL),
+(18, 7,  1.00, 1.00, NULL),
+(18, 10, 2.00, 2.00, NULL),
+(18, 21, 1.00, 1.00, NULL),
+-- OT 19 (El Prado alarma + acceso)
+(19, 11, 1.00, 1.00, NULL),
+(19, 16, 1.00, 1.00, NULL),
+(19, 17, 1.00, 1.00, NULL),
+(19, 13, 4.00, 4.00, NULL),
+-- OT 21 (Control acceso Clínica 4 puertas)
+(21, 16, 4.00, 4.00, NULL),
+(21, 17, 4.00, 4.00, NULL),
+(21, 18, 4.00, 4.00, NULL),
+(21, 19, 4.00, 4.00, NULL),
+(21, 20, 4.00, 4.00, NULL),
+(21, 21, 1.00, 1.00, NULL),
+-- OT 22 (Clínica config usuarios)
+(22, 19, 2.00, 1.00, 'Sobrante 1 paquete tarjetas'),
+-- OT 23 (Cerco Warnes día 1)
+(23, 30, 4.00, 4.00, NULL),
+(23, 25,10.00,10.00, NULL),
+-- OT 24 (Cerco Warnes día 2)
+(24, 30, 4.00, 4.00, NULL),
+-- OT 25 (Cerco Warnes día 3 + energizador)
+(25, 30, 4.00, 4.00, NULL),
+(25, 29, 1.00, 1.00, NULL),
+(25, 26, 2.00, 2.00, NULL),
+-- OT 29 (Mercado cableado)
+(29, 21, 1.00, 1.00, NULL),
+(29, 25,10.00, 9.00, NULL),
+-- OT 30 (Mercado montaje cámaras — en proceso)
+(30, 1,  6.00, 4.00, 'Pendiente instalar 2 cámaras'),
+(30, 7,  1.00, 1.00, NULL),
+(30, 10, 1.00, 1.00, NULL),
+-- OT 31 (Boutique cableado)
+(31, 21, 1.00, 1.00, NULL),
+(31, 25, 6.00, 6.00, NULL),
+-- OT 32 (Boutique cámaras — en proceso)
+(32, 1,  6.00, 0.00, 'Aún no instaladas'),
+(32, 6,  1.00, 0.00, 'Aún no instalado'),
+-- OT 33 (Alarma Bernal instalación)
+(33, 12, 1.00, 1.00, NULL),
+(33, 13, 6.00, 5.00, 'Falta 1 sensor PIR'),
+(33, 28, 1.00, 1.00, NULL),
+-- OT 34 (Alarma Bernal sensor faltante)
+(34, 13, 1.00, 0.00, 'Esperando stock'),
+-- OT 35 (Colegio cableado fase 1)
+(35, 21, 2.00, 2.00, NULL),
+(35, 25,15.00,14.00, NULL),
+-- OT 36 (Colegio cableado fase 2)
+(36, 21, 1.00, 1.00, NULL),
+(36, 25,10.00,10.00, NULL),
+-- OT 37 (Colegio cámaras — en proceso)
+(37, 2, 12.00, 8.00, 'Pendiente instalar 4 cámaras'),
+(37, 7,  1.00, 1.00, NULL),
+(37, 10, 1.00, 1.00, NULL);
+
+-- orden_historial: id_orden_trabajo, id_estado_anterior, id_estado_nuevo,
+--                  id_usuario, fecha_cambio, observacion
+INSERT INTO orden_historial (id_orden_trabajo, id_estado_anterior, id_estado_nuevo, id_usuario, fecha_cambio, observacion) VALUES
+-- OT 1
+(1,  NULL, 1, 2, '2023-02-28 16:00:00', 'Orden creada'),
+(1,  1,    2, 2, '2023-03-01 07:30:00', 'Asignada a Roberto y Miguel'),
+(1,  2,    3, 6, '2023-03-01 07:50:00', 'En camino'),
+(1,  3,    4, 6, '2023-03-01 08:00:00', 'Inicio de trabajos'),
+(1,  4,    6, 6, '2023-03-01 12:30:00', 'Cableado completado'),
+(1,  6,    7, 2, '2023-03-01 14:00:00', 'Validado por coordinador'),
+-- OT 2
+(2,  NULL, 1, 2, '2023-03-01 16:00:00', 'Orden creada'),
+(2,  1,    2, 2, '2023-03-02 07:30:00', 'Asignada'),
+(2,  2,    3, 6, '2023-03-02 07:45:00', 'En camino'),
+(2,  3,    4, 6, '2023-03-02 08:00:00', 'Inicio montaje'),
+(2,  4,    6, 6, '2023-03-02 17:00:00', 'Cámaras montadas y operativas'),
+(2,  6,    7, 2, '2023-03-02 18:00:00', 'Validado'),
+-- OT 3
+(3,  NULL, 1, 2, '2023-03-15 10:00:00', 'Orden de pruebas y entrega'),
+(3,  1,    2, 2, '2023-03-20 08:00:00', 'Asignada a Roberto'),
+(3,  2,    4, 6, '2023-03-20 09:00:00', 'Pruebas iniciadas'),
+(3,  4,    6, 6, '2023-03-20 11:00:00', 'Pruebas OK'),
+(3,  6,    7, 2, '2023-03-20 11:30:00', 'Validada y entregada'),
+-- OT 4 (alarma Peña)
+(4,  NULL, 1, 2, '2022-10-30 15:00:00', 'Creada para instalación alarma'),
+(4,  1,    2, 2, '2022-11-01 08:00:00', 'Asignada a Juan Vargas'),
+(4,  2,    3, 7, '2022-11-01 08:30:00', 'En camino'),
+(4,  3,    4, 7, '2022-11-01 09:00:00', 'Inicio instalación'),
+(4,  4,    6, 7, '2022-11-01 16:00:00', 'Panel y sensores instalados'),
+(4,  6,    7, 2, '2022-11-01 17:00:00', 'Validada'),
+-- OT 5 (capacitación Peña)
+(5,  NULL, 1, 2, '2022-11-10 09:00:00', 'Creada para capacitación'),
+(5,  1,    2, 2, '2022-11-15 09:00:00', 'Asignada'),
+(5,  2,    4, 7, '2022-11-15 10:00:00', 'Inicio capacitación'),
+(5,  4,    6, 7, '2022-11-15 13:00:00', 'Capacitación completada'),
+(5,  6,    7, 2, '2022-11-15 14:00:00', 'Validada'),
+-- OT 9 (Ferretería Pinto)
+(9,  NULL, 1, 2, '2022-05-05 09:00:00', 'Creada para trabajo en Montero'),
+(9,  1,    2, 2, '2022-05-10 07:00:00', 'Asignada al equipo'),
+(9,  2,    3, 6, '2022-05-10 07:15:00', 'Viajando a Montero'),
+(9,  3,    4, 6, '2022-05-10 09:00:00', 'Inicio en sitio'),
+(9,  4,    6, 6, '2022-05-10 17:00:00', 'Instalación completa'),
+(9,  6,    7, 2, '2022-05-10 18:00:00', 'Validada'),
+-- OT 21 (control acceso Clínica)
+(21, NULL, 1, 2, '2022-07-05 10:00:00', 'Creada para control acceso clínica'),
+(21, 1,    2, 2, '2022-07-10 07:00:00', 'Asignada a Sergio y Héctor'),
+(21, 2,    3, 8, '2022-07-10 07:20:00', 'En camino'),
+(21, 3,    4, 8, '2022-07-10 07:30:00', 'Inicio instalación biométricos'),
+(21, 4,    6, 8, '2022-07-10 17:00:00', 'Todas las puertas operativas'),
+(21, 6,    7, 2, '2022-07-11 09:00:00', 'Validada por coordinador'),
+-- OT 29 (Mercado cableado - completada)
+(29, NULL, 1, 2, '2023-01-15 16:00:00', 'Creada para cableado mercado'),
+(29, 1,    2, 2, '2023-01-20 06:30:00', 'Asignada'),
+(29, 2,    4, 8, '2023-01-20 07:00:00', 'Inicio cableado'),
+(29, 4,    6, 8, '2023-01-20 16:00:00', 'Cableado completado'),
+-- OT 30 (Mercado cámaras - iniciada)
+(30, NULL, 1, 2, '2023-01-25 10:00:00', 'Creada para montaje cámaras'),
+(30, 1,    2, 2, '2023-02-05 07:30:00', 'Asignada'),
+(30, 2,    4, 8, '2023-02-05 08:00:00', 'Inicio montaje'),
+-- OT 33 (alarma Bernal - completada)
+(33, NULL, 1, 2, '2023-07-10 14:00:00', 'Creada para instalación panel'),
+(33, 1,    2, 2, '2023-07-15 08:30:00', 'Asignada a Juan Vargas'),
+(33, 2,    3, 7, '2023-07-15 08:45:00', 'En camino'),
+(33, 3,    4, 7, '2023-07-15 09:00:00', 'Inicio instalación'),
+(33, 4,    6, 7, '2023-07-15 16:00:00', 'Panel y 5 sensores instalados'),
+-- OT 34 (sensor faltante - creada)
+(34, NULL, 1, 2, '2023-07-16 10:00:00', 'Espera sensor PIR en stock'),
+-- OT 37 (Colegio cámaras - iniciada)
+(37, NULL, 1, 2, '2024-01-05 10:00:00', 'Creada para montaje cámaras colegio'),
+(37, 1,    2, 2, '2024-01-10 07:30:00', 'Asignada a Roberto y Miguel'),
+(37, 2,    3, 6, '2024-01-10 07:45:00', 'En camino al colegio'),
+(37, 3,    4, 6, '2024-01-10 08:00:00', 'Inicio montaje de cámaras'),
+-- OT 42 (Mantenimiento Gutiérrez - validada)
+(42, NULL, 1, 2, '2023-09-10 09:00:00', 'Creada para mantenimiento semestral'),
+(42, 1,    2, 2, '2023-09-15 08:30:00', 'Asignada a Roberto'),
+(42, 2,    3, 6, '2023-09-15 08:45:00', 'En camino'),
+(42, 3,    4, 6, '2023-09-15 09:00:00', 'Inicio mantenimiento'),
+(42, 4,    6, 6, '2023-09-15 12:30:00', 'Mantenimiento completado'),
+(42, 6,    7, 2, '2023-09-15 13:30:00', 'Validado'),
+-- OT 44 (Correctivo Farmacia - validada)
+(44, NULL, 1, 5, '2022-03-09 11:00:00', 'Cliente reportó cámara sin imagen'),
+(44, 1,    2, 2, '2022-03-10 09:30:00', 'Asignada a técnico'),
+(44, 2,    4, 6, '2022-03-10 10:00:00', 'Técnico en sitio'),
+(44, 4,    6, 6, '2022-03-10 13:00:00', 'Cámara reemplazada'),
+(44, 6,    7, 2, '2022-03-10 14:00:00', 'Validado correctivo');
+
+-- ============================================================
+-- MÓDULO 6: MANTENIMIENTOS
+-- mantenimiento: id_sistema, id_orden_trabajo, id_usuario,
+--               tipo, fecha_programada, periodicidad_dias,
+--               estado, creado_automaticamente
+-- ============================================================
+
+INSERT INTO mantenimiento (id_sistema, id_orden_trabajo, id_usuario, tipo, fecha_programada, periodicidad_dias, estado, creado_automaticamente) VALUES
+-- Sistema 1 — CCTV Casa Gutiérrez (cada 180 días)
+(1,  42,   2, 'preventivo', '2023-09-15', 180, 'completado', FALSE),  -- 1  OT-2023-032
+(1,  NULL, 2, 'preventivo', '2024-03-15', 180, 'pendiente',  TRUE),   -- 2
+-- Sistema 3 — Alarma Casa Peña (cada 365 días)
+(3,  NULL, 2, 'preventivo', '2023-11-10', 365, 'completado', FALSE),  -- 3
+(3,  NULL, 2, 'preventivo', '2024-11-10', 365, 'pendiente',  TRUE),   -- 4
+-- Sistema 4 — Cerco Montaño (cada 180 días)
+(4,  NULL, 2, 'preventivo', '2023-02-05', 180, 'completado', FALSE),  -- 5
+(4,  NULL, 2, 'preventivo', '2023-08-07', 180, 'completado', TRUE),   -- 6
+(4,  NULL, 2, 'preventivo', '2024-02-08', 180, 'pendiente',  TRUE),   -- 7
+-- Sistema 6 — Alarma Soria Warnes (cada 365 días)
+(6,  NULL, 2, 'preventivo', '2024-09-12', 365, 'pendiente',  TRUE),   -- 8
+-- Sistema 7 — CCTV Mercado Villca (cada 180 días)
+(7,  NULL, 2, 'preventivo', '2023-07-20', 180, 'pendiente',  FALSE),  -- 9
+-- Sistema 9 — CCTV Ferretería Pinto (cada 180 días)
+(9,  NULL, 2, 'preventivo', '2022-11-18', 180, 'completado', FALSE),  -- 10
+(9,  NULL, 2, 'preventivo', '2023-05-20', 180, 'completado', TRUE),   -- 11
+(9,  NULL, 2, 'preventivo', '2023-11-22', 180, 'pendiente',  TRUE),   -- 12
+-- Sistema 10 — Control Acceso Bodega Pinto (cada 365 días)
+(10, NULL, 2, 'preventivo', '2023-06-10', 365, 'completado', FALSE),  -- 13
+(10, NULL, 2, 'preventivo', '2024-06-10', 365, 'pendiente',  TRUE),   -- 14
+-- Sistema 11 — CCTV Boutique Espinoza (cada 180 días)
+(11, NULL, 2, 'preventivo', '2023-10-22', 180, 'pendiente',  FALSE),  -- 15
+-- Sistema 12 — Alarma Casa Bernal (cada 365 días)
+(12, NULL, 2, 'preventivo', '2024-07-30', 365, 'pendiente',  FALSE),  -- 16
+-- Sistema 13 — Cerco Taller Jiménez (cada 180 días)
+(13, NULL, 2, 'preventivo', '2024-08-10', 180, 'pendiente',  FALSE),  -- 17
+-- Sistema 15 — Sistema integrado El Prado (cada 180 días)
+(15, NULL, 2, 'preventivo', '2023-03-01', 180, 'completado', FALSE),  -- 18
+(15, NULL, 2, 'preventivo', '2023-09-03', 180, 'completado', TRUE),   -- 19
+(15, NULL, 2, 'preventivo', '2024-03-05', 180, 'pendiente',  TRUE),   -- 20
+-- Sistema 16 — Farmacia Matriz (cada 180 días)
+(16, NULL, 2, 'preventivo', '2022-05-20', 180, 'completado', FALSE),  -- 21  OT-2022-018
+(16, NULL, 2, 'preventivo', '2022-11-20', 180, 'completado', TRUE),   -- 22
+(16, NULL, 2, 'preventivo', '2023-05-22', 180, 'completado', TRUE),   -- 23
+(16, NULL, 2, 'preventivo', '2023-11-24', 180, 'pendiente',  TRUE),   -- 24
+-- Sistema 18 — Los Andes (cada 90 días)
+(18, NULL, 2, 'preventivo', '2021-12-15', 90,  'completado', FALSE),  -- 25
+(18, NULL, 2, 'preventivo', '2022-03-15', 90,  'completado', TRUE),   -- 26
+(18, NULL, 2, 'preventivo', '2022-06-17', 90,  'completado', TRUE),   -- 27
+(18, NULL, 2, 'preventivo', '2022-09-20', 90,  'completado', TRUE),   -- 28
+-- Sistema 19 — Cerco Acopio Warnes (cada 180 días)
+(19, NULL, 2, 'preventivo', '2022-10-15', 180, 'completado', FALSE),  -- 29
+(19, NULL, 2, 'preventivo', '2023-04-16', 180, 'completado', TRUE);   -- 30
+
+-- alerta_mantenimiento: id_mantenimiento, id_usuario,
+--                       id_establecimiento, fecha, estado, observacion
+INSERT INTO alerta_mantenimiento (id_mantenimiento, id_usuario, id_establecimiento, fecha, estado, observacion) VALUES
+-- Alertas pendientes (mantenimientos próximos o vencidos)
+(2,  1, 1,  '2024-03-01 08:00:00', 'pendiente',  'Mantenimiento próximo en 15 días: CCTV Casa Gutiérrez'),
+(4,  1, 3,  '2024-10-25 08:00:00', 'pendiente',  'Mantenimiento anual próximo: Alarma Casa Peña'),
+(7,  1, 4,  '2024-01-25 08:00:00', 'pendiente',  'Mantenimiento programado: Cerco Taller Montaño'),
+(8,  1, 5,  '2024-09-05 08:00:00', 'pendiente',  'Primer mantenimiento anual: Alarma Soria Warnes'),
+(12, 1, 8,  '2023-11-08 08:00:00', 'enviada',    'Mantenimiento próximo: CCTV Ferretería Pinto'),
+(14, 1, 8,  '2024-05-25 08:00:00', 'pendiente',  'Mantenimiento anual: Control Acceso Bodega Pinto'),
+(15, 1, 9,  '2023-10-08 08:00:00', 'enviada',    'Primer mantenimiento: CCTV Boutique Espinoza'),
+(16, 1, 10, '2024-07-15 08:00:00', 'pendiente',  'Primer mantenimiento anual: Alarma Casa Bernal'),
+(17, 1, 12, '2024-07-25 08:00:00', 'pendiente',  'Primer mantenimiento: Cerco+CCTV Taller Jiménez'),
+(20, 1, 14, '2024-02-20 08:00:00', 'pendiente',  'Mantenimiento próximo: Sistema El Prado'),
+(24, 1, 15, '2023-11-10 08:00:00', 'enviada',    'Mantenimiento programado: Farmacia San Martín'),
+-- Alertas históricas (leídas o completadas)
+(1,  1, 1,  '2023-09-01 08:00:00', 'completada', 'Mantenimiento en 14 días: CCTV Casa Gutiérrez'),
+(3,  1, 3,  '2023-10-27 08:00:00', 'leida',      'Mantenimiento próximo: Alarma Casa Peña'),
+(5,  1, 4,  '2023-01-22 08:00:00', 'completada', 'Mantenimiento próximo: Cerco Taller Montaño'),
+(6,  1, 4,  '2023-07-24 08:00:00', 'completada', 'Mantenimiento próximo: Cerco Taller Montaño'),
+(9,  1, 6,  '2023-07-10 08:00:00', 'leida',      'Primer mantenimiento pendiente: CCTV Mercado Villca'),
+(10, 1, 8,  '2022-11-04 08:00:00', 'completada', 'Mantenimiento próximo: CCTV Ferretería Pinto'),
+(11, 1, 8,  '2023-05-06 08:00:00', 'completada', 'Mantenimiento próximo: CCTV Ferretería Pinto'),
+(13, 1, 8,  '2023-05-26 08:00:00', 'completada', 'Mantenimiento anual próximo: Control Acceso Pinto'),
+(18, 1, 14, '2023-02-15 08:00:00', 'completada', 'Mantenimiento próximo: Sistema El Prado'),
+(19, 1, 14, '2023-08-20 08:00:00', 'completada', 'Mantenimiento próximo: Sistema El Prado'),
+(21, 1, 15, '2022-05-06 08:00:00', 'completada', 'Primer mantenimiento próximo: Farmacia'),
+(22, 1, 15, '2022-11-06 08:00:00', 'completada', 'Mantenimiento próximo: Farmacia'),
+(23, 1, 15, '2023-05-08 08:00:00', 'completada', 'Mantenimiento próximo: Farmacia'),
+(25, 1, 17, '2021-12-01 08:00:00', 'completada', 'Primer mantenimiento próximo: Los Andes'),
+(26, 1, 17, '2022-03-01 08:00:00', 'completada', 'Mantenimiento trimestral próximo: Los Andes'),
+(27, 1, 17, '2022-06-03 08:00:00', 'completada', 'Mantenimiento trimestral próximo: Los Andes'),
+(28, 1, 17, '2022-09-06 08:00:00', 'completada', 'Mantenimiento trimestral próximo: Los Andes'),
+(29, 1, 18, '2022-10-01 08:00:00', 'completada', 'Mantenimiento próximo: Cerco Acopio Warnes'),
+(30, 1, 18, '2023-04-02 08:00:00', 'completada', 'Mantenimiento próximo: Cerco Acopio Warnes');
+
+-- ============================================================
+-- MÓDULO 7: BITÁCORAS
+-- bitacora_cliente: id_entidad, id_usuario, nota
+-- bitacora_proyecto: id_proyecto, id_usuario, nota
+-- ============================================================
+
+INSERT INTO bitacora_cliente (id_entidad, id_usuario, nota, fecha_creacion) VALUES
+(16, 5, 'Primera visita de levantamiento. Cliente interesado en CCTV para casa. Se tomaron medidas y se evaluaron puntos de instalación.',                          '2023-02-10 10:00:00'),
+(16, 5, 'Llamada de seguimiento. Cliente consultó sobre el tiempo de instalación. Se informó que es de 2 días hábiles.',                                           '2023-02-25 11:30:00'),
+(28, 5, 'Reunión con gerente de Comercial El Prado. Requieren sistema integrado: CCTV 12c, alarma y control de acceso.',                                           '2022-07-08 09:00:00'),
+(30, 5, 'Visita técnica con gerencia Los Andes. Requerimiento extenso: 20 cámaras, control de acceso y alarma para supermercado completo.',                        '2021-05-03 10:00:00'),
+(33, 5, 'Reunión con administración de la clínica. Se requieren 4 puertas con control de acceso biométrico y 16 cámaras interiores y exteriores.',                 '2022-06-02 09:30:00'),
+(29, 5, 'Contacto inicial Farmacia San Martín. Cliente llamó interesado en proteger su local. Se agenda visita técnica para la semana siguiente.',                  '2021-10-05 14:00:00'),
+(17, 5, 'Levantamiento domicilio Peña. Vivienda unifamiliar de dos pisos. Se relevó perímetro y se recomendó alarma de 16 zonas con sensores PIR.',               '2022-10-08 10:00:00'),
+(34, 5, 'Reunión con dirección del colegio. Requieren 12 cámaras para cubrir entrada, pasillos y patios. Presupuesto aprobado por el directorio.',                '2023-10-02 09:00:00');
+
+INSERT INTO bitacora_proyecto (id_proyecto, id_usuario, nota, fecha_creacion) VALUES
+(1,  2, 'Proyecto iniciado. Materiales recibidos en almacén. Equipo coordinado para inicio de trabajos el día 1.',                                                 '2023-03-01 07:00:00'),
+(1,  2, 'Sistema entregado y probado. Cliente firmó acta de conformidad. Sin observaciones pendientes.',                                                           '2023-03-20 12:00:00'),
+(7,  2, 'Interrupción por falta de materiales. Se agotó stock de cámaras importadas. Proveedor informa demora de 2 semanas por aduana.',                          '2021-07-10 16:00:00'),
+(7,  2, 'Reanudación con material alternativo. Se consiguió stock equivalente con proveedor local TecnoBolivia. Continuidad garantizada.',                         '2021-07-25 08:00:00'),
+(7,  2, 'Entrega sistema integrado Los Andes. Sistema de 20 cámaras, control de acceso y alarma operativos al 100%. Firma de conformidad obtenida.',              '2021-08-30 12:00:00'),
+(13, 2, 'Avance cableado mercado. Primera fase completada. Se programa segunda visita para montaje de cámaras en 2 semanas.',                                      '2023-01-20 17:00:00'),
+(15, 2, 'Instalación al 90%. Falta un sensor PIR que no llegó en el pedido al proveedor. Se solicitó reposición urgente.',                                        '2023-07-16 09:00:00'),
+(16, 2, 'Cableado bloque B terminado. 50% del proyecto completado. Próxima visita programada para montaje de cámaras.',                                           '2023-12-10 17:00:00'),
+(9,  2, 'Reporte de falla en período de garantía. Lector de puerta 2 sin respuesta. Técnico Sergio lo resolvió con reset de firmware en visita correctiva.',       '2022-12-05 10:00:00'),
+(17, 2, 'Coordinación inicio proyecto Taller Jiménez. Materiales para cerco y CCTV en pedido. Inicio programado para semana del 18 de marzo de 2024.',            '2024-02-15 14:00:00');
+
+-- ============================================================
+-- MÓDULO 7: DOCUMENTOS
+-- documento: id_proyecto, id_entidad, id_usuario,
+--            id_tipo_documento, nombre, ruta, descripcion
+-- ============================================================
+
+INSERT INTO documento (id_proyecto, id_entidad, id_usuario, id_tipo_documento, nombre, ruta, descripcion) VALUES
+-- Proyecto 1 (CCTV Casa Gutiérrez)
+(1,  16, 1, 1, 'contrato_PROJ2023001.pdf',         '/docs/proyectos/2023/PROJ2023001/contrato_PROJ2023001.pdf',         'Contrato de instalación firmado por el cliente'),
+(1,  16, 4, 2, 'cotizacion_PROJ2023001.pdf',        '/docs/proyectos/2023/PROJ2023001/cotizacion_PROJ2023001.pdf',       'Cotización aprobada por el cliente'),
+(1,  16, 2, 7, 'croquis_PROJ2023001.pdf',           '/docs/proyectos/2023/PROJ2023001/croquis_PROJ2023001.pdf',          'Plano de ubicación de cámaras en domicilio'),
+(1,  16, 2, 3, 'acta_entrega_PROJ2023001.pdf',      '/docs/proyectos/2023/PROJ2023001/acta_entrega_PROJ2023001.pdf',     'Acta de entrega firmada por el cliente'),
+(1,  16, 2, 4, 'acta_conformidad_PROJ2023001.pdf',  '/docs/proyectos/2023/PROJ2023001/acta_conformidad_PROJ2023001.pdf', 'Acta de conformidad del cliente Gutiérrez'),
+-- Proyecto 2 (Alarma Casa Peña)
+(2,  17, 1, 1, 'contrato_PROJ2022008.pdf',          '/docs/proyectos/2022/PROJ2022008/contrato_PROJ2022008.pdf',         'Contrato de instalación alarma'),
+(2,  17, 4, 2, 'cotizacion_PROJ2022008.pdf',         '/docs/proyectos/2022/PROJ2022008/cotizacion_PROJ2022008.pdf',      'Cotización alarma 16 zonas'),
+(2,  17, 2, 3, 'acta_entrega_PROJ2022008.pdf',       '/docs/proyectos/2022/PROJ2022008/acta_entrega_PROJ2022008.pdf',    'Acta de entrega sistema alarma'),
+(2,  17, 2, 6, 'compromiso_mant_PROJ2022008.pdf',    '/docs/proyectos/2022/PROJ2022008/compromiso_mant_PROJ2022008.pdf', 'Compromiso de mantenimiento anual firmado'),
+-- Proyecto 3 (Cerco Montaño)
+(3,  18, 1, 1, 'contrato_PROJ2022006.pdf',           '/docs/proyectos/2022/PROJ2022006/contrato_PROJ2022006.pdf',        'Contrato cerco eléctrico'),
+(3,  18, 4, 2, 'cotizacion_PROJ2022006.pdf',          '/docs/proyectos/2022/PROJ2022006/cotizacion_PROJ2022006.pdf',     'Cotización cerco 80m'),
+(3,  18, 2, 3, 'acta_entrega_PROJ2022006.pdf',        '/docs/proyectos/2022/PROJ2022006/acta_entrega_PROJ2022006.pdf',   'Acta de entrega cerco eléctrico'),
+(3,  18, 2, 6, 'compromiso_mant_PROJ2022006.pdf',     '/docs/proyectos/2022/PROJ2022006/compromiso_mant_PROJ2022006.pdf','Compromiso mantenimiento cerco semestral'),
+-- Proyecto 4 (Ferretería Pinto)
+(4,  22, 1, 1, 'contrato_PROJ2022004.pdf',            '/docs/proyectos/2022/PROJ2022004/contrato_PROJ2022004.pdf',       'Contrato CCTV Ferretería Pinto'),
+(4,  22, 4, 2, 'cotizacion_PROJ2022004.pdf',           '/docs/proyectos/2022/PROJ2022004/cotizacion_PROJ2022004.pdf',    'Cotización CCTV 4 cámaras'),
+(4,  22, 2, 3, 'acta_entrega_PROJ2022004.pdf',         '/docs/proyectos/2022/PROJ2022004/acta_entrega_PROJ2022004.pdf',  'Acta entrega sistema CCTV Pinto'),
+-- Proyecto 6 (Farmacia Matriz)
+(6,  29, 1, 1, 'contrato_PROJ2021011.pdf',             '/docs/proyectos/2021/PROJ2021011/contrato_PROJ2021011.pdf',      'Contrato sistema integrado Farmacia'),
+(6,  29, 4, 2, 'cotizacion_PROJ2021011.pdf',            '/docs/proyectos/2021/PROJ2021011/cotizacion_PROJ2021011.pdf',   'Cotización CCTV + alarma Farmacia'),
+(6,  29, 2, 3, 'acta_entrega_PROJ2021011.pdf',          '/docs/proyectos/2021/PROJ2021011/acta_entrega_PROJ2021011.pdf', 'Acta de entrega Farmacia San Martín'),
+(6,  29, 2, 5, 'acta_garantia_PROJ2021011.pdf',         '/docs/proyectos/2021/PROJ2021011/acta_garantia_PROJ2021011.pdf','Acta de garantía 12 meses'),
+(6,  29, 2, 6, 'compromiso_mant_PROJ2021011.pdf',       '/docs/proyectos/2021/PROJ2021011/compromiso_mant_PROJ2021011.pdf','Compromiso mantenimiento semestral'),
+-- Proyecto 7 (Los Andes)
+(7,  30, 1, 1, 'contrato_PROJ2021006.pdf',              '/docs/proyectos/2021/PROJ2021006/contrato_PROJ2021006.pdf',     'Contrato sistema integrado Los Andes'),
+(7,  30, 4, 2, 'cotizacion_PROJ2021006.pdf',             '/docs/proyectos/2021/PROJ2021006/cotizacion_PROJ2021006.pdf',  'Cotización sistema integrado completo'),
+(7,  30, 2, 7, 'croquis_PROJ2021006.pdf',                '/docs/proyectos/2021/PROJ2021006/croquis_PROJ2021006.pdf',     'Plano distribución cámaras supermercado'),
+(7,  30, 2, 3, 'acta_entrega_PROJ2021006.pdf',           '/docs/proyectos/2021/PROJ2021006/acta_entrega_PROJ2021006.pdf','Entrega formal sistema integrado'),
+(7,  30, 2, 4, 'acta_conformidad_PROJ2021006.pdf',       '/docs/proyectos/2021/PROJ2021006/acta_conformidad_PROJ2021006.pdf','Conformidad cliente Los Andes'),
+(7,  30, 2, 6, 'compromiso_mant_PROJ2021006.pdf',        '/docs/proyectos/2021/PROJ2021006/compromiso_mant_PROJ2021006.pdf','Compromiso mantenimiento trimestral'),
+(7,  30, 2, 9, 'informe_tecnico_PROJ2021006.pdf',        '/docs/proyectos/2021/PROJ2021006/informe_tecnico_PROJ2021006.pdf','Informe técnico instalación completa'),
+-- Proyecto 8 (El Prado)
+(8,  28, 1, 1, 'contrato_PROJ2022009.pdf',               '/docs/proyectos/2022/PROJ2022009/contrato_PROJ2022009.pdf',   'Contrato sistema integrado El Prado'),
+(8,  28, 4, 2, 'cotizacion_PROJ2022009.pdf',              '/docs/proyectos/2022/PROJ2022009/cotizacion_PROJ2022009.pdf','Cotización sistema integrado'),
+(8,  28, 2, 3, 'acta_entrega_PROJ2022009.pdf',            '/docs/proyectos/2022/PROJ2022009/acta_entrega_PROJ2022009.pdf','Entrega sistema El Prado'),
+(8,  28, 2, 6, 'compromiso_mant_PROJ2022009.pdf',         '/docs/proyectos/2022/PROJ2022009/compromiso_mant_PROJ2022009.pdf','Compromiso mantenimiento semestral'),
+-- Proyecto 9 (Clínica Control Acceso)
+(9,  33, 1, 1, 'contrato_PROJ2022007.pdf',                '/docs/proyectos/2022/PROJ2022007/contrato_PROJ2022007.pdf',  'Contrato control acceso clínica'),
+(9,  33, 4, 2, 'cotizacion_PROJ2022007.pdf',               '/docs/proyectos/2022/PROJ2022007/cotizacion_PROJ2022007.pdf','Cotización control acceso 4 puertas'),
+(9,  33, 2, 3, 'acta_entrega_PROJ2022007.pdf',             '/docs/proyectos/2022/PROJ2022007/acta_entrega_PROJ2022007.pdf','Acta de entrega control acceso'),
+(9,  33, 2, 5, 'acta_garantia_PROJ2022007.pdf',            '/docs/proyectos/2022/PROJ2022007/acta_garantia_PROJ2022007.pdf','Garantía control acceso 12 meses'),
+-- Proyecto 11 (Cerco Acopio Warnes)
+(11, 31, 1, 1, 'contrato_PROJ2022002.pdf',                 '/docs/proyectos/2022/PROJ2022002/contrato_PROJ2022002.pdf', 'Contrato cerco industrial Warnes'),
+(11, 31, 4, 2, 'cotizacion_PROJ2022002.pdf',                '/docs/proyectos/2022/PROJ2022002/cotizacion_PROJ2022002.pdf','Cotización cerco 300m'),
+(11, 31, 2, 3, 'acta_entrega_PROJ2022002.pdf',              '/docs/proyectos/2022/PROJ2022002/acta_entrega_PROJ2022002.pdf','Acta entrega cerco Acopio Warnes'),
+(11, 31, 2, 6, 'compromiso_mant_PROJ2022002.pdf',           '/docs/proyectos/2022/PROJ2022002/compromiso_mant_PROJ2022002.pdf','Compromiso mantenimiento semestral cerco'),
+-- Proyectos activos (contrato + cotización)
+(13, 20, 1, 1, 'contrato_PROJ2023002.pdf',                  '/docs/proyectos/2023/PROJ2023002/contrato_PROJ2023002.pdf','Contrato CCTV Mercado Villca'),
+(13, 20, 4, 2, 'cotizacion_PROJ2023002.pdf',                 '/docs/proyectos/2023/PROJ2023002/cotizacion_PROJ2023002.pdf','Cotización CCTV 6 cámaras mercado'),
+(14, 23, 1, 1, 'contrato_PROJ2023004.pdf',                   '/docs/proyectos/2023/PROJ2023004/contrato_PROJ2023004.pdf','Contrato CCTV Boutique Espinoza'),
+(14, 23, 4, 2, 'cotizacion_PROJ2023004.pdf',                  '/docs/proyectos/2023/PROJ2023004/cotizacion_PROJ2023004.pdf','Cotización CCTV 6 cámaras boutique'),
+(15, 24, 1, 1, 'contrato_PROJ2023006.pdf',                    '/docs/proyectos/2023/PROJ2023006/contrato_PROJ2023006.pdf','Contrato alarma Casa Bernal'),
+(15, 24, 4, 2, 'cotizacion_PROJ2023006.pdf',                   '/docs/proyectos/2023/PROJ2023006/cotizacion_PROJ2023006.pdf','Cotización alarma GSM'),
+(16, 34, 1, 1, 'contrato_PROJ2023012.pdf',                     '/docs/proyectos/2023/PROJ2023012/contrato_PROJ2023012.pdf','Contrato CCTV Colegio Boliviano Japonés'),
+(16, 34, 4, 2, 'cotizacion_PROJ2023012.pdf',                    '/docs/proyectos/2023/PROJ2023012/cotizacion_PROJ2023012.pdf','Cotización CCTV 12 cámaras colegio'),
+(17, 26, 1, 1, 'contrato_PROJ2024003.pdf',                      '/docs/proyectos/2024/PROJ2024003/contrato_PROJ2024003.pdf','Contrato Cerco+CCTV Taller Jiménez'),
+(17, 26, 4, 2, 'cotizacion_PROJ2024003.pdf',                     '/docs/proyectos/2024/PROJ2024003/cotizacion_PROJ2024003.pdf','Cotización cerco 120m + CCTV 4c'),
+(18, 25, 1, 1, 'contrato_PROJ2024004.pdf',                       '/docs/proyectos/2024/PROJ2024004/contrato_PROJ2024004.pdf','Contrato CCTV Casa Aguilar La Guardia'),
+(18, 25, 4, 2, 'cotizacion_PROJ2024004.pdf',                      '/docs/proyectos/2024/PROJ2024004/cotizacion_PROJ2024004.pdf','Cotización CCTV 4 cámaras doméstico'),
+-- Informes técnicos mantenimientos
+(19, 16, 2, 9, 'informe_mant_PROJ2023010.pdf',                    '/docs/proyectos/2023/PROJ2023010/informe_mant_PROJ2023010.pdf','Informe mantenimiento semestral CCTV Gutiérrez'),
+(20, 29, 2, 9, 'informe_mant_PROJ2022011.pdf',                    '/docs/proyectos/2022/PROJ2022011/informe_mant_PROJ2022011.pdf','Informe mantenimiento preventivo Farmacia');
+
+-- ============================================================
+-- MÓDULO 8: FINANZAS
+-- pago: id_proyecto, id_usuario, tipo_pago, monto,
+--       fecha_pago, metodo, observacion
+-- ============================================================
+
+INSERT INTO pago (id_proyecto, id_usuario, tipo_pago, monto, fecha_pago, metodo, observacion) VALUES
+-- Proyecto 1 (Casa Gutiérrez — total: 9350)
+(1,  1, 'anticipo',    4675.00, '2023-02-28', 'transferencia', '50% anticipo al firmar contrato'),
+(1,  1, 'pago_final',  4675.00, '2023-03-20', 'efectivo',      'Saldo al completar instalación'),
+-- Proyecto 2 (Alarma Casa Peña — total: 5780)
+(2,  1, 'anticipo',    2890.00, '2022-10-28', 'transferencia', '50% anticipo'),
+(2,  1, 'pago_final',  2890.00, '2022-11-15', 'efectivo',      'Saldo final'),
+-- Proyecto 3 (Cerco Montaño — total: 6750)
+(3,  1, 'anticipo',    3375.00, '2022-07-30', 'transferencia', 'Anticipo 50%'),
+(3,  1, 'pago_final',  3375.00, '2022-08-20', 'efectivo',      'Pago final'),
+-- Proyecto 4 (Ferretería Pinto — total: 5340)
+(4,  1, 'anticipo',    2670.00, '2022-04-30', 'transferencia', 'Anticipo 50%'),
+(4,  1, 'pago_final',  2670.00, '2022-05-18', 'efectivo',      'Pago final Montero'),
+-- Proyecto 5 (Ampliación Montaño — total: 3360)
+(5,  1, 'anticipo',   1680.00, '2023-05-15', 'transferencia', 'Anticipo 50% ampliación CCTV Montaño'),
+(5,  1, 'pago_final', 1680.00, '2023-06-01', 'efectivo',      'Pago final ampliación'),
+-- Proyecto 6 (Farmacia Matriz — total: 11700)
+(6,  1, 'anticipo',    4680.00, '2021-10-28', 'transferencia', 'Anticipo 40%'),
+(6,  1, 'pago_parcial',3510.00, '2021-11-20', 'QR',            'Pago parcial 30%'),
+(6,  1, 'pago_final',  3510.00, '2021-12-10', 'efectivo',      'Saldo 30%'),
+-- Proyecto 7 (Los Andes — total: 36000)
+(7,  1, 'anticipo',   14400.00, '2021-05-28', 'transferencia', 'Anticipo 40%'),
+(7,  1, 'pago_parcial',10800.00,'2021-07-01', 'transferencia', 'Pago parcial 30%'),
+(7,  1, 'pago_final', 10800.00, '2021-08-30', 'transferencia', 'Pago final 30%'),
+-- Proyecto 8 (El Prado — total: 22000)
+(8,  1, 'anticipo',    8800.00, '2022-08-28', 'transferencia', 'Anticipo 40%'),
+(8,  1, 'pago_parcial',6600.00, '2022-09-25', 'QR',            'Pago parcial 30%'),
+(8,  1, 'pago_final',  6600.00, '2022-10-20', 'efectivo',      'Pago final 30%'),
+-- Proyecto 9 (Clínica Acceso — total: 10300)
+(9,  1, 'anticipo',    5150.00, '2022-06-28', 'transferencia', 'Anticipo 50%'),
+(9,  1, 'pago_final',  5150.00, '2022-07-30', 'transferencia', 'Pago final'),
+-- Proyecto 11 (Cerco Warnes — total: 15300)
+(11, 1, 'anticipo',    6120.00, '2022-02-25', 'transferencia', 'Anticipo 40%'),
+(11, 1, 'pago_parcial',4590.00, '2022-03-15', 'transferencia', 'Pago parcial 30%'),
+(11, 1, 'pago_final',  4590.00, '2022-04-15', 'efectivo',      'Pago final'),
+-- Proyectos en ejecución (solo anticipo)
+(13, 1, 'anticipo',    3230.00, '2023-01-12', 'QR',            'Anticipo 50% CCTV Mercado Villca'),
+(16, 1, 'anticipo',    6050.00, '2023-11-10', 'transferencia', 'Anticipo 50% CCTV Colegio Boliviano Japonés'),
+-- Proyecto 12 (Control Acceso Bodega Pinto)
+(12, 1, 'anticipo',   1500.00, '2022-05-18', 'efectivo',      'Anticipo control acceso bodega'),
+(12, 1, 'pago_final', 1500.00, '2022-06-10', 'efectivo',      'Pago final bodega Pinto'),
+-- Proyecto 19 (Mantenimiento Gutiérrez — total: 900)
+(19, 1, 'pago_final',  900.00, '2023-09-15', 'QR',            'Pago mantenimiento semestral Gutiérrez'),
+-- Proyecto 20 (Mantenimiento Farmacia — total: 900)
+(20, 1, 'pago_final',  900.00, '2022-05-15', 'efectivo',      'Pago mantenimiento preventivo Farmacia');
+
+
+-- gasto_orden: id_orden, id_usuario, concepto, descripcion,
+--              monto, fecha_gasto
+INSERT INTO gasto_orden (id_orden, id_usuario, concepto, descripcion, monto, fecha_gasto) VALUES
+-- OT 1 (cableado Casa Gutiérrez)
+(1,  2, 'transporte',  'Combustible y movilización al domicilio',          45.00, '2023-03-01'),
+(1,  2, 'materiales',  'Tornillos, bridas y tarugos varios',               28.00, '2023-03-01'),
+-- OT 2 (montaje cámaras)
+(2,  2, 'transporte',  'Combustible y movilización',                       45.00, '2023-03-02'),
+(2,  2, 'viaticos',    'Alimentación equipo técnico (2 personas)',         60.00, '2023-03-02'),
+-- OT 6 (cerco día 1 Montaño)
+(6,  2, 'transporte',  'Transporte equipo y herramientas al taller',       80.00, '2022-08-01'),
+(6,  2, 'viaticos',    'Alimentación equipo (2 personas)',                 80.00, '2022-08-01'),
+(6,  2, 'otro',        'Alquiler de herramienta de tensado de cable',     120.00, '2022-08-01'),
+-- OT 7 (cerco día 2)
+(7,  2, 'transporte',  'Transporte al taller día 2',                       80.00, '2022-08-02'),
+(7,  2, 'viaticos',    'Alimentación equipo',                              80.00, '2022-08-02'),
+-- OT 9 (Ferretería Pinto — Montero)
+(9,  2, 'transporte',  'Transporte ida y vuelta a Montero',               180.00, '2022-05-10'),
+(9,  2, 'viaticos',    'Alimentación equipo (3 personas)',                120.00, '2022-05-10'),
+-- OT 12 (Los Andes cableado fase 1)
+(12, 2, 'transporte',  'Transporte equipo al supermercado',                80.00, '2021-06-05'),
+(12, 2, 'viaticos',    'Alimentación equipo (3 personas)',                120.00, '2021-06-05'),
+(12, 2, 'otro',        'Alquiler escalera telescópica jornada completa',  200.00, '2021-06-05'),
+-- OT 13 (Los Andes zona cajas)
+(13, 2, 'transporte',  'Transporte',                                       80.00, '2021-06-15'),
+(13, 2, 'viaticos',    'Alimentación',                                    120.00, '2021-06-15'),
+-- OT 14 (Los Andes pasillos)
+(14, 2, 'transporte',  'Transporte',                                       80.00, '2021-06-20'),
+(14, 2, 'viaticos',    'Alimentación',                                    120.00, '2021-06-20'),
+-- OT 15 (Los Andes control acceso + alarma)
+(15, 2, 'transporte',  'Transporte',                                       80.00, '2021-07-01'),
+(15, 2, 'materiales',  'Prensas, cinta aislante y varios menores',         45.00, '2021-07-01'),
+-- OT 18 (El Prado CCTV)
+(18, 2, 'transporte',  'Transporte equipo',                                80.00, '2022-09-10'),
+(18, 2, 'viaticos',    'Alimentación equipo',                             100.00, '2022-09-10'),
+-- OT 19 (El Prado alarma + acceso)
+(19, 2, 'transporte',  'Transporte',                                       80.00, '2022-09-20'),
+(19, 2, 'materiales',  'Materiales eléctricos menores',                    55.00, '2022-09-20'),
+-- OT 21 (Control acceso Clínica)
+(21, 2, 'transporte',  'Transporte a clínica',                             60.00, '2022-07-10'),
+(21, 2, 'viaticos',    'Alimentación equipo (2 personas)',                 80.00, '2022-07-10'),
+-- OT 23 (Cerco Acopio Warnes día 1)
+(23, 2, 'transporte',  'Transporte a Warnes ida y vuelta',                120.00, '2022-03-05'),
+(23, 2, 'viaticos',    'Alimentación equipo (2 personas)',                 80.00, '2022-03-05'),
+(23, 2, 'otro',        'Alquiler herramienta de tensado',                 150.00, '2022-03-05'),
+-- OT 24 (Cerco Warnes día 2)
+(24, 2, 'transporte',  'Transporte a Warnes',                             120.00, '2022-03-12'),
+(24, 2, 'viaticos',    'Alimentación',                                     80.00, '2022-03-12'),
+-- OT 25 (Cerco Warnes día 3)
+(25, 2, 'transporte',  'Transporte a Warnes',                             120.00, '2022-04-01'),
+(25, 2, 'viaticos',    'Alimentación',                                     80.00, '2022-04-01'),
+-- OT 29 (Mercado Villca cableado)
+(29, 2, 'transporte',  'Transporte al mercado',                            50.00, '2023-01-20'),
+(29, 2, 'materiales',  'Materiales menores de fijación',                   35.00, '2023-01-20'),
+-- OT 35 (Colegio cableado fase 1)
+(35, 2, 'transporte',  'Transporte equipo al colegio',                     60.00, '2023-11-20'),
+(35, 2, 'viaticos',    'Alimentación equipo (2 personas)',                  80.00, '2023-11-20'),
+-- OT 36 (Colegio cableado fase 2)
+(36, 2, 'transporte',  'Transporte',                                        60.00, '2023-12-05'),
+(36, 2, 'viaticos',    'Alimentación',                                      80.00, '2023-12-05');
+
+-- ============================================================
+-- MÓDULO 9: NOTIFICACIONES
+-- tipo ENUM: alerta_mantenimiento | orden_asignada |
+--            proyecto_actualizado | pago_registrado | stock_critico
+-- notificacion: id_usuario, titulo, mensaje, tipo, leida, url
+-- ============================================================
+
+INSERT INTO notificacion (id_usuario, titulo, mensaje, tipo, leida, url) VALUES
+-- Alertas de mantenimiento
+(1, 'Mantenimiento próximo',       'CCTV Casa Gutiérrez: mantenimiento en 15 días (15/03/2024)',                   'alerta_mantenimiento', FALSE, '/mantenimientos/2'),
+(1, 'Mantenimiento próximo',       'Sistema El Prado: mantenimiento semestral en 13 días (05/03/2024)',            'alerta_mantenimiento', FALSE, '/mantenimientos/20'),
+(1, 'Mantenimiento vencido',       'Farmacia San Martín: mantenimiento con 10 días de retraso',                    'alerta_mantenimiento', FALSE, '/mantenimientos/24'),
+(1, 'Alerta mantenimiento',        'CCTV Boutique Espinoza: primer mantenimiento pendiente desde Oct/2023',        'alerta_mantenimiento', TRUE,  '/mantenimientos/15'),
+(1, 'Alerta mantenimiento',        'Ferretería Pinto: CCTV requiere mantenimiento este mes',                       'alerta_mantenimiento', TRUE,  '/mantenimientos/12'),
+(1, 'Mantenimiento próximo',       'Control Acceso Bodega Pinto: mantenimiento anual en 16 días',                  'alerta_mantenimiento', FALSE, '/mantenimientos/14'),
+-- Notificaciones de proyectos
+(2, 'Proyecto aprobado',           'Proyecto PROJ-2024-004 (Casa Aguilar La Guardia) aprobado por el cliente',    'proyecto_actualizado', TRUE,  '/proyectos/18'),
+(2, 'Proyecto aprobado',           'Proyecto PROJ-2024-003 (Taller Jiménez) aprobado por el cliente',             'proyecto_actualizado', TRUE,  '/proyectos/17'),
+(2, 'Proyecto en ejecución',       'Proyecto PROJ-2023-012 (Colegio) avanzó a estado En Ejecución',               'proyecto_actualizado', TRUE,  '/proyectos/16'),
+(2, 'Proyecto detenido',           'Proyecto PROJ-2021-006 (Los Andes) detenido por falta de materiales',         'proyecto_actualizado', TRUE,  '/proyectos/7'),
+-- Notificaciones de órdenes asignadas
+(6, 'Orden asignada',              'OT-2023-006: Montaje cámaras Mercado Villca asignada a tu equipo',            'orden_asignada',       TRUE,  '/ordenes/30'),
+(7, 'Orden asignada',              'OT-2023-043: Montaje cámaras Colegio asignada a tu equipo',                   'orden_asignada',       TRUE,  '/ordenes/37'),
+(8, 'Orden asignada',              'OT-2023-043: Colegio — también asignado a tu equipo',                         'orden_asignada',       TRUE,  '/ordenes/37'),
+(9, 'Orden asignada',              'OT-2022-040: Correctivo Farmacia San Martín asignado a ti',                   'orden_asignada',       TRUE,  '/ordenes/44'),
+(10,'Orden asignada',              'OT-2022-050: Correctivo biométrico Clínica Santa Rosa asignado',              'orden_asignada',       TRUE,  '/ordenes/45'),
+(6, 'Orden pendiente',             'OT-2023-006 en estado Iniciada desde hace 10 días. Actualizar estado.',        'orden_asignada',       FALSE, '/ordenes/30'),
+(7, 'Orden pendiente',             'OT-2023-043 (Colegio) en estado Iniciada. Reportar avance.',                  'orden_asignada',       FALSE, '/ordenes/37'),
+-- Notificaciones de pagos
+(1, 'Pago registrado',             'Anticipo Bs 3.230 registrado — Proyecto CCTV Mercado Villca',                 'pago_registrado',      TRUE,  '/pagos/23'),
+(1, 'Pago registrado',             'Anticipo Bs 6.050 registrado — Proyecto Colegio Boliviano Japonés',           'pago_registrado',      TRUE,  '/pagos/24'),
+(1, 'Pago registrado',             'Pago final Bs 4.675 registrado — Proyecto CCTV Casa Gutiérrez',               'pago_registrado',      TRUE,  '/pagos/2'),
+(1, 'Pago registrado',             'Pago final Bs 10.800 registrado — Proyecto Los Andes',                        'pago_registrado',      TRUE,  '/pagos/14'),
+-- Notificaciones de stock crítico
+(1, 'Stock crítico',               'Sensor PIR doble tecnología: sin stock disponible. Pedido pendiente.',         'stock_critico',        FALSE, '/productos/13'),
+(1, 'Stock crítico',               'Batería 12V 7Ah: stock bajo (2 unidades). Reabastecer pronto.',               'stock_critico',        TRUE,  '/productos/28'),
+-- Notificaciones de garantía (proyecto_actualizado)
+(2, 'Garantía activa',             'Control Acceso Clínica Santa Rosa en período de garantía hasta Jul/2023',     'proyecto_actualizado', TRUE,  '/proyectos/9'),
+(2, 'Garantía activa',             'CCTV Clínica Santa Rosa en período de garantía hasta Ago/2023',               'proyecto_actualizado', TRUE,  '/proyectos/10'),
+(2, 'Falla en garantía',           'Biométrico Clínica: falla reportada. Se generó OT correctiva OT-2022-050.',   'proyecto_actualizado', TRUE,  '/proyectos/9'),
+(2, 'Proyecto cerrado',            'Proyecto PROJ-2023-001 (Casa Gutiérrez) cerrado formalmente',                  'proyecto_actualizado', TRUE,  '/proyectos/1'),
+(2, 'Proyecto completado',         'Proyecto PROJ-2021-011 (Farmacia San Martín) marcado como Completado',        'proyecto_actualizado', TRUE,  '/proyectos/6'),
+(1, 'Resumen del mes',             'Abril 2024: 2 proyectos aprobados, 4 en ejecución, 3 mantenimientos pendientes.','proyecto_actualizado',FALSE, '/dashboard'),
+(4, 'Levantamiento agendado',      'Visita de levantamiento en Oficina Gutiérrez programada para 28/Feb/2024',     'proyecto_actualizado', TRUE,  '/proyectos/20');
+
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- ======================================================================
+-- |				FIN 					|
+-- ======================================================================
+-- | tipo_documento: 	    10  | municipio: 			10   	|	 
+-- | tipo_establecimiento:   5	| proveedor: 			10	|
+-- | tipo_sistema: 	     7  | categoria: 			 7	|
+-- | telefono: 		    45  | telefono_proveedor: 		10	|
+-- | producto: 		    30  | producto_proveedor: 		45	|
+-- | entidad: 		    35  | entidad_natural: 		27  	|	
+-- | entidad_juridica: 	     8	| empleado: 			15	|
+-- | telefono_entidad: 	    35	| cargo: 			 6      |		
+-- | especialidad: 	     6  | empleado_especialidad: 	20	|
+-- | rol: 		     4  | permiso: 			18     	|	
+-- | rol_permiso: 	    41	| sistema: 			25	|
+-- | usuario: 		    10  | establecimiento: 		20 	|	
+-- | servicio: 		     6  | estado_proyecto: 		10	|
+-- | estado_orden: 	     8	| cotizacion: 			20	|
+-- | proyecto_historial:    26	| cotizacion_detalle: 		70	|
+-- | proyecto: 		    20  | orden_historial: 		68	|
+-- | orden_trabajo: 	    42 	| orden_empleado: 		73	|
+-- | orden_producto: 	    82 	| mantenimiento: 		30	|
+-- | alerta_mantenimiento:  30	| bitacora_proyecto: 		10	|
+-- | bitacora_cliente: 	     8 	| pago: 			30	|
+-- | documento: 	    54  | gasto_orden: 	 		39    	|
+-- | notificacion: 	    30	|					|
+-- ======================================================================
