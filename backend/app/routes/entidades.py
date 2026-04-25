@@ -4,12 +4,14 @@ from ..extensions import db
 from ..models.entidad import Entidad, EntidadNatural, EntidadJuridica, Establecimiento, Sistema
 from ..models.catalogo import Telefono
 from ..bitacora import log
+from ..permisos import requiere_permiso
 
 bp = Blueprint('entidades', __name__)
 
 
 @bp.get('/')
 @jwt_required()
+@requiere_permiso('ver_clientes')
 def listar():
     entidades = Entidad.query.filter_by(estado=True).all()
     return jsonify([_serializar(e) for e in entidades])
@@ -17,6 +19,7 @@ def listar():
 
 @bp.get('/<int:id_entidad>')
 @jwt_required()
+@requiere_permiso('ver_clientes')
 def obtener(id_entidad):
     entidad = db.get_or_404(Entidad, id_entidad)
     return jsonify(_serializar(entidad))
@@ -24,6 +27,7 @@ def obtener(id_entidad):
 
 @bp.post('/')
 @jwt_required()
+@requiere_permiso('crear_clientes')
 def crear():
     data = request.get_json()
     usuario = get_jwt_identity()
@@ -77,6 +81,7 @@ def crear():
 
 @bp.put('/<int:id_entidad>')
 @jwt_required()
+@requiere_permiso('editar_clientes')
 def actualizar(id_entidad):
     entidad = db.get_or_404(Entidad, id_entidad)
     data = request.get_json()
@@ -124,6 +129,7 @@ def actualizar(id_entidad):
 
 @bp.delete('/<int:id_entidad>')
 @jwt_required()
+@requiere_permiso('editar_clientes')
 def desactivar(id_entidad):
     entidad = db.get_or_404(Entidad, id_entidad)
     entidad.estado = False
@@ -135,6 +141,7 @@ def desactivar(id_entidad):
 
 @bp.get('/<int:id_entidad>/sistemas')
 @jwt_required()
+@requiere_permiso('ver_clientes')
 def listar_sistemas(id_entidad):
     sistemas = (
         Sistema.query
@@ -147,6 +154,7 @@ def listar_sistemas(id_entidad):
 
 @bp.post('/<int:id_entidad>/sistemas')
 @jwt_required()
+@requiere_permiso('editar_clientes')
 def crear_sistema(id_entidad):
     """Crea un establecimiento (si hace falta) y un sistema para la entidad."""
     entidad = db.get_or_404(Entidad, id_entidad)

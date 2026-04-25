@@ -10,7 +10,7 @@ bp = Blueprint('notificaciones', __name__)
 @jwt_required()
 def listar():
     id_usuario = int(get_jwt_identity())
-    notifs = Notificacion.query.filter_by(id_usuario=id_usuario).order_by(Notificacion.fecha.desc()).all()
+    notifs = Notificacion.query.filter_by(id_usuario=id_usuario).order_by(Notificacion.fecha_creacion.desc()).all()
     return jsonify([_serializar(n) for n in notifs])
 
 
@@ -25,11 +25,11 @@ def marcar_leida(id_notificacion):
 
 def _serializar(n: Notificacion) -> dict:
     return {
-        'id_notificacion': n.id_notificacion,
+        'id': n.id,
         'tipo': n.tipo,
         'titulo': n.titulo,
         'mensaje': n.mensaje,
         'leida': n.leida,
-        'fecha': n.fecha.isoformat() if n.fecha else None,
-        'url_referencia': n.url_referencia,
+        'fecha_creacion': n.fecha_creacion.isoformat() if n.fecha_creacion else None,
+        'url': n.url,
     }
