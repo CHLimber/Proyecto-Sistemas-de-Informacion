@@ -4,12 +4,14 @@ from ..extensions import db
 from ..models.producto import Producto
 from ..models.catalogo import Categoria
 from ..bitacora import log
+from ..permisos import requiere_permiso
 
 bp = Blueprint('productos', __name__)
 
 
 @bp.get('/')
 @jwt_required()
+@requiere_permiso('gestionar_catalogo')
 def listar():
     productos = Producto.query.filter_by(estado=True).order_by(Producto.nombre).all()
     return jsonify([_serializar(p) for p in productos])
@@ -17,6 +19,7 @@ def listar():
 
 @bp.get('/<int:id_producto>')
 @jwt_required()
+@requiere_permiso('gestionar_catalogo')
 def obtener(id_producto):
     p = db.get_or_404(Producto, id_producto)
     return jsonify(_serializar(p))
@@ -24,6 +27,7 @@ def obtener(id_producto):
 
 @bp.post('/')
 @jwt_required()
+@requiere_permiso('gestionar_catalogo')
 def crear():
     data = request.get_json()
     usuario = get_jwt_identity()
@@ -54,6 +58,7 @@ def crear():
 
 @bp.put('/<int:id_producto>')
 @jwt_required()
+@requiere_permiso('gestionar_catalogo')
 def actualizar(id_producto):
     p = db.get_or_404(Producto, id_producto)
     data = request.get_json()
@@ -84,6 +89,7 @@ def actualizar(id_producto):
 
 @bp.delete('/<int:id_producto>')
 @jwt_required()
+@requiere_permiso('gestionar_catalogo')
 def desactivar(id_producto):
     p = db.get_or_404(Producto, id_producto)
     p.estado = False

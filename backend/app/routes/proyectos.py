@@ -5,12 +5,14 @@ from ..extensions import db
 from ..models.proyecto import Proyecto, ProyectoHistorial, EstadoProyecto
 from ..models.entidad import Establecimiento
 from ..bitacora import log
+from ..permisos import requiere_permiso
 
 bp = Blueprint('proyectos', __name__)
 
 
 @bp.get('/')
 @jwt_required()
+@requiere_permiso('ver_proyectos')
 def listar():
     proyectos = Proyecto.query.order_by(Proyecto.id.desc()).all()
     return jsonify([_serializar(p) for p in proyectos])
@@ -18,6 +20,7 @@ def listar():
 
 @bp.get('/estados')
 @jwt_required()
+@requiere_permiso('ver_proyectos')
 def listar_estados():
     estados = EstadoProyecto.query.order_by(EstadoProyecto.orden).all()
     return jsonify([{'id': e.id, 'nombre': e.nombre, 'orden': e.orden} for e in estados])
@@ -25,6 +28,7 @@ def listar_estados():
 
 @bp.get('/<int:id_proyecto>')
 @jwt_required()
+@requiere_permiso('ver_proyectos')
 def obtener(id_proyecto):
     p = db.get_or_404(Proyecto, id_proyecto)
     return jsonify(_serializar(p, detalle=True))
@@ -32,6 +36,7 @@ def obtener(id_proyecto):
 
 @bp.post('/')
 @jwt_required()
+@requiere_permiso('crear_proyectos')
 def crear():
     data = request.get_json()
     id_usuario = int(get_jwt_identity())
@@ -92,6 +97,7 @@ def crear():
 
 @bp.put('/<int:id_proyecto>')
 @jwt_required()
+@requiere_permiso('editar_proyectos')
 def actualizar(id_proyecto):
     p = db.get_or_404(Proyecto, id_proyecto)
     data = request.get_json()

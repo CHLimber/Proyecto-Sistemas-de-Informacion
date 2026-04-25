@@ -4,6 +4,7 @@ from decimal import Decimal
 from ..extensions import db
 from ..models.finanzas import Pago, GastoOrden
 from ..bitacora import log
+from ..permisos import requiere_permiso
 
 bp = Blueprint('finanzas', __name__)
 
@@ -16,6 +17,7 @@ CONCEPTOS    = ('materiales', 'viaticos', 'transporte', 'otro')
 
 @bp.get('/pagos')
 @jwt_required()
+@requiere_permiso('ver_finanzas')
 def listar_pagos():
     pagos = Pago.query.order_by(Pago.fecha_pago.desc()).all()
     return jsonify([_serializar_pago(p) for p in pagos])
@@ -23,6 +25,7 @@ def listar_pagos():
 
 @bp.get('/pagos/proyecto/<int:id_proyecto>')
 @jwt_required()
+@requiere_permiso('ver_finanzas')
 def pagos_por_proyecto(id_proyecto):
     pagos = Pago.query.filter_by(id_proyecto=id_proyecto).order_by(Pago.fecha_pago.desc()).all()
     total = sum(p.monto for p in pagos)
@@ -31,6 +34,7 @@ def pagos_por_proyecto(id_proyecto):
 
 @bp.post('/pagos')
 @jwt_required()
+@requiere_permiso('gestionar_finanzas')
 def registrar_pago():
     data = request.get_json()
     id_usuario = int(get_jwt_identity())
@@ -70,6 +74,7 @@ def registrar_pago():
 
 @bp.get('/gastos')
 @jwt_required()
+@requiere_permiso('ver_finanzas')
 def listar_gastos():
     gastos = GastoOrden.query.order_by(GastoOrden.fecha_gasto.desc()).all()
     return jsonify([_serializar_gasto(g) for g in gastos])
@@ -77,6 +82,7 @@ def listar_gastos():
 
 @bp.post('/gastos')
 @jwt_required()
+@requiere_permiso('gestionar_finanzas')
 def registrar_gasto():
     data = request.get_json()
     id_usuario = int(get_jwt_identity())
@@ -113,6 +119,7 @@ def registrar_gasto():
 
 @bp.get('/cuentas-por-cobrar')
 @jwt_required()
+@requiere_permiso('ver_finanzas')
 def cuentas_por_cobrar():
     from ..extensions import db
     from sqlalchemy import text

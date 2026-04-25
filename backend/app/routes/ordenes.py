@@ -5,12 +5,14 @@ from ..extensions import db
 from ..models.orden import OrdenTrabajo, OrdenEmpleado, OrdenProducto, OrdenHistorial, EstadoOrden
 from ..models.entidad import Empleado
 from ..bitacora import log
+from ..permisos import requiere_permiso
 
 bp = Blueprint('ordenes', __name__)
 
 
 @bp.get('/')
 @jwt_required()
+@requiere_permiso('ver_ordenes')
 def listar():
     ordenes = OrdenTrabajo.query.order_by(OrdenTrabajo.id.desc()).all()
     return jsonify([_serializar(o) for o in ordenes])
@@ -18,6 +20,7 @@ def listar():
 
 @bp.get('/estados')
 @jwt_required()
+@requiere_permiso('ver_ordenes')
 def listar_estados():
     estados = EstadoOrden.query.order_by(EstadoOrden.orden).all()
     return jsonify([{'id': e.id, 'nombre': e.nombre} for e in estados])
@@ -25,6 +28,7 @@ def listar_estados():
 
 @bp.get('/<int:id_orden>')
 @jwt_required()
+@requiere_permiso('ver_ordenes')
 def obtener(id_orden):
     o = db.get_or_404(OrdenTrabajo, id_orden)
     return jsonify(_serializar(o, detalle=True))
@@ -32,6 +36,7 @@ def obtener(id_orden):
 
 @bp.post('/')
 @jwt_required()
+@requiere_permiso('crear_ordenes')
 def crear():
     data = request.get_json()
     id_usuario = int(get_jwt_identity())
@@ -106,6 +111,7 @@ def crear():
 
 @bp.put('/<int:id_orden>')
 @jwt_required()
+@requiere_permiso('editar_ordenes')
 def actualizar(id_orden):
     o = db.get_or_404(OrdenTrabajo, id_orden)
     data = request.get_json()

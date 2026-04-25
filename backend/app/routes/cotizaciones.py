@@ -5,6 +5,7 @@ from ..extensions import db
 from ..models.cotizacion import Cotizacion, CotizacionDetalle
 from ..models.auth import Usuario
 from ..bitacora import log
+from ..permisos import requiere_permiso
 
 bp = Blueprint('cotizaciones', __name__)
 
@@ -19,6 +20,7 @@ def _get_usuario_id(identity):
 
 @bp.get('/')
 @jwt_required()
+@requiere_permiso('ver_cotizaciones')
 def listar():
     cotizaciones = Cotizacion.query.order_by(Cotizacion.fecha_creacion.desc()).all()
     return jsonify([_serializar(c) for c in cotizaciones])
@@ -26,6 +28,7 @@ def listar():
 
 @bp.get('/<int:id_cotizacion>')
 @jwt_required()
+@requiere_permiso('ver_cotizaciones')
 def obtener(id_cotizacion):
     c = db.get_or_404(Cotizacion, id_cotizacion)
     return jsonify(_serializar(c, detalle=True))
@@ -33,6 +36,7 @@ def obtener(id_cotizacion):
 
 @bp.post('/')
 @jwt_required()
+@requiere_permiso('crear_cotizaciones')
 def crear():
     data = request.get_json()
     username = get_jwt_identity()
@@ -114,6 +118,7 @@ def crear():
 
 @bp.put('/<int:id_cotizacion>')
 @jwt_required()
+@requiere_permiso('crear_cotizaciones')
 def actualizar(id_cotizacion):
     c = db.get_or_404(Cotizacion, id_cotizacion)
     data = request.get_json()
@@ -143,6 +148,7 @@ def actualizar(id_cotizacion):
 
 @bp.post('/<int:id_cotizacion>/cambiar-estado')
 @jwt_required()
+@requiere_permiso('crear_cotizaciones')
 def cambiar_estado(id_cotizacion):
     c = db.get_or_404(Cotizacion, id_cotizacion)
     data = request.get_json()

@@ -13,13 +13,20 @@ export function AuthProvider({ children }) {
   async function login(username, password) {
     const data = await authApi.login(username, password)
     localStorage.setItem('token', data.access_token)
+    localStorage.setItem('refresh_token', data.refresh_token)
     localStorage.setItem('usuario', JSON.stringify(data.usuario))
     setToken(data.access_token)
     setUsuario(data.usuario)
   }
 
-  function logout() {
+  async function logout() {
+    try {
+      await authApi.logout()
+    } catch (_) {
+      // Si falla el aviso al servidor, igual limpiamos la sesión local
+    }
     localStorage.removeItem('token')
+    localStorage.removeItem('refresh_token')
     localStorage.removeItem('usuario')
     setToken(null)
     setUsuario(null)

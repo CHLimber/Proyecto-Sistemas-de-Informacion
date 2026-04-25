@@ -74,12 +74,8 @@ export default function OrdenesPage() {
     setProyectos(proys)
     setServicios(servs)
     setEmpleados(emps)
-    setProductos(ests) // placeholder corregido abajo
+    setProductos(prods)
     if (ests.length > 0) setForm(f => ({ ...f, id_estado_orden: ests[0].id }))
-
-    // cargar productos correctamente
-    const { productosApi } = await import('../../api/productos')
-    setProductos(await productosApi.listar())
   }
 
   function toggleEmpleado(id_empleado) {

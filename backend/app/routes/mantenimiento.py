@@ -3,6 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from ..extensions import db
 from ..models.mantenimiento import Mantenimiento
 from ..bitacora import log
+from ..permisos import requiere_permiso
 
 bp = Blueprint('mantenimiento', __name__)
 
@@ -12,6 +13,7 @@ TIPOS   = ('preventivo', 'correctivo')
 
 @bp.get('/')
 @jwt_required()
+@requiere_permiso('ver_mantenimientos')
 def listar():
     mantenimientos = Mantenimiento.query.order_by(Mantenimiento.fecha_programada).all()
     return jsonify([_serializar(m) for m in mantenimientos])
@@ -19,6 +21,7 @@ def listar():
 
 @bp.get('/<int:id_mantenimiento>')
 @jwt_required()
+@requiere_permiso('ver_mantenimientos')
 def obtener(id_mantenimiento):
     m = db.get_or_404(Mantenimiento, id_mantenimiento)
     return jsonify(_serializar(m))
@@ -26,6 +29,7 @@ def obtener(id_mantenimiento):
 
 @bp.post('/')
 @jwt_required()
+@requiere_permiso('gestionar_mantenimientos')
 def crear():
     data = request.get_json()
     id_usuario = int(get_jwt_identity())
@@ -55,6 +59,7 @@ def crear():
 
 @bp.put('/<int:id_mantenimiento>')
 @jwt_required()
+@requiere_permiso('gestionar_mantenimientos')
 def actualizar(id_mantenimiento):
     m = db.get_or_404(Mantenimiento, id_mantenimiento)
     data = request.get_json()
