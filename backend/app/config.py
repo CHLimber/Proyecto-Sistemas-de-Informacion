@@ -14,11 +14,15 @@ class Config:
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=7)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    SQLALCHEMY_DATABASE_URI = (
-        f"mysql+pymysql://{os.getenv('DB_USER', 'root')}:{os.getenv('DB_PASSWORD', '')}"
-        f"@{os.getenv('DB_HOST', 'localhost')}:{os.getenv('DB_PORT', '3306')}"
-        f"/{os.getenv('DB_NAME', 'AWGPMCESE')}?charset=utf8mb4"
-    )
+    _mysql_url = os.getenv('MYSQL_URL')
+    if _mysql_url:
+        SQLALCHEMY_DATABASE_URI = _mysql_url.replace('mysql://', 'mysql+pymysql://', 1) + '?charset=utf8mb4'
+    else:
+        SQLALCHEMY_DATABASE_URI = (
+            f"mysql+pymysql://{os.getenv('DB_USER', 'root')}:{os.getenv('DB_PASSWORD', '')}"
+            f"@{os.getenv('DB_HOST', 'localhost')}:{os.getenv('DB_PORT', '3306')}"
+            f"/{os.getenv('DB_NAME', 'AWGPMCESE')}?charset=utf8mb4"
+        )
 
     LOGIN_MAX_INTENTOS = int(os.getenv('LOGIN_MAX_INTENTOS', 3))
     # Tiempos de bloqueo progresivo (en minutos): 1er bloqueo, 2do, 3ro, 4to+
