@@ -4,8 +4,8 @@ __pycache__/
 *.pyo
 *.pyd
 *.egg-info/
-dist/
-build/
+/dist/
+/build/
 .eggs/
 
 # Entorno virtual
@@ -19,7 +19,7 @@ backend/.env
 # ── Node / React ─────────────────────────────────────
 node_modules/
 frontend/node_modules/
-frontend/dist/
+# frontend/dist/  # descomentado temporalmente para el deploy en PythonAnywhere
 frontend/.env
 frontend/.env.local
 

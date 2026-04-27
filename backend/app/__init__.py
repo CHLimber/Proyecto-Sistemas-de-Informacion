@@ -1,7 +1,7 @@
 import os
-from flask import Flask
+from flask import Flask, send_from_directory
 from .config import config
-from .extensions import db, migrate, jwt, cors
+from .extensions import db, migrate, jwt, cors, mail
 
 
 def create_app(env: str = None):
@@ -9,11 +9,17 @@ def create_app(env: str = None):
     env = env or os.getenv('FLASK_ENV', 'default')
     app.config.from_object(config[env])
 
+    DIST_DIR = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+        'frontend', 'dist'
+    )
+
     # Extensiones
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
     cors.init_app(app, resources={r'/api/*': {'origins': '*'}})
+    mail.init_app(app)
 
     # Blueprints
     from .routes.auth import bp as auth_bp
@@ -39,5 +45,12 @@ def create_app(env: str = None):
     app.register_blueprint(catalogos_bp,     url_prefix='/api/catalogos')
     app.register_blueprint(productos_bp,     url_prefix='/api/productos')
     app.register_blueprint(usuarios_bp,      url_prefix='/api/usuarios')
+
+    @app.route('/', defaults={'path': ''})
+    @app.route('/<path:path>')
+    def serve_spa(path):
+        if path and os.path.exists(os.path.join(DIST_DIR, path)):
+            return send_from_directory(DIST_DIR, path)
+        return send_from_directory(DIST_DIR, 'index.html')
 
     return app

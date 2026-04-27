@@ -35,9 +35,11 @@ class Usuario(db.Model):
     ultimo_acceso = db.Column(db.DateTime)
     fecha_creacion = db.Column(db.DateTime, server_default=db.func.now())
     fecha_actualizacion = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
-    # Columnas agregadas vía migración
+    # Columnas de seguridad (vía migración)
     intentos_fallidos = db.Column(db.SmallInteger, nullable=False, default=0)
     bloqueado_hasta = db.Column(db.DateTime, nullable=True)
+    veces_bloqueado = db.Column(db.SmallInteger, nullable=False, default=0)
+    ultima_salida = db.Column(db.DateTime, nullable=True)
 
     rol = db.relationship('Rol', back_populates='usuarios')
     empleado = db.relationship('Empleado', back_populates='usuario')
