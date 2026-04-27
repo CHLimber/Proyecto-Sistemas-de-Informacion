@@ -1,6 +1,6 @@
 """
 Ejecutar UNA VEZ para:
-1. Agregar columnas intentos_fallidos y bloqueado_hasta a la tabla usuario
+1. Agregar columnas intentos_fallidos y bloqueado_hasta a la tabla usuario (si no existen)
 2. Actualizar los hashes de contraseña al formato werkzeug (pbkdf2:sha256)
 
 Uso:
@@ -21,6 +21,7 @@ Credenciales que quedan:
 """
 
 from werkzeug.security import generate_password_hash
+from sqlalchemy import text
 from app import create_app
 from app.extensions import db
 
@@ -40,6 +41,28 @@ PASSWORDS = {
 app = create_app()
 
 with app.app_context():
+
+    # ── 1. Agregar columnas faltantes si no existen ───────────────────────────
+    print('Verificando columnas en tabla usuario...')
+
+    columnas_requeridas = {
+        'intentos_fallidos': 'ALTER TABLE usuario ADD COLUMN intentos_fallidos SMALLINT NOT NULL DEFAULT 0',
+        'bloqueado_hasta':   'ALTER TABLE usuario ADD COLUMN bloqueado_hasta DATETIME NULL',
+    }
+
+    resultado = db.session.execute(text('SHOW COLUMNS FROM usuario')).fetchall()
+    columnas_existentes = {fila[0] for fila in resultado}
+
+    for columna, sql in columnas_requeridas.items():
+        if columna not in columnas_existentes:
+            db.session.execute(text(sql))
+            db.session.commit()
+            print(f'  + Columna "{columna}" agregada.')
+        else:
+            print(f'  ✓ Columna "{columna}" ya existe.')
+
+    # ── 2. Actualizar contraseñas ─────────────────────────────────────────────
+    print('\nActualizando contraseñas...')
     from app.models.auth import Usuario
     actualizados = 0
     for username, password in PASSWORDS.items():
@@ -51,4 +74,4 @@ with app.app_context():
         else:
             print(f'  ✗ {username} — no encontrado en BD')
     db.session.commit()
-    print(f'\n{actualizados} usuarios actualizados.')
+    print(f'\n{actualizados} contraseñas actualizadas.')
