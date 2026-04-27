@@ -18,9 +18,9 @@ Plataforma web para gestión de empresas de seguridad electrónica.
 
 ### 1. Base de datos
 
-Ejecutar en MySQL el script `scrip creacion BD.txt` para crear la base de datos y las tablas.
+Ejecutar en MySQL el script `backend/scrip creacion BD.txt` para crear la base de datos y las tablas.
 
-Opcionalmente ejecutar `scrip poblacion.txt` para cargar datos de prueba.
+Opcionalmente ejecutar `backend/scrip poblacion.txt` para cargar datos de prueba.
 
 ### 2. Backend
 
@@ -80,17 +80,56 @@ Proyecto/
 │   │   ├── routes/       # Blueprints Flask (API REST)
 │   │   └── ...
 │   ├── migrations/       # Migraciones Alembic
+│   ├── scrip creacion BD.txt
+│   ├── scrip poblacion.txt
+│   ├── seed_railway.py   # Seed automático en Railway
+│   ├── Procfile
+│   ├── railway.json
 │   ├── requirements.txt
 │   └── run.py
-├── frontend/
-│   ├── src/
-│   │   ├── api/          # Clientes Axios por módulo
-│   │   ├── pages/        # Páginas React
-│   │   └── ...
-│   └── package.json
-├── scrip creacion BD.txt
-└── scrip poblacion.txt
+└── frontend/
+    ├── src/
+    │   ├── api/          # Clientes Axios por módulo
+    │   ├── pages/        # Páginas React
+    │   └── ...
+    ├── railway.json
+    └── package.json
 ```
+
+---
+
+## Despliegue en Railway
+
+### Backend (servicio Python)
+
+1. Crear servicio desde el repo, **Root Directory: `backend`**.
+2. Conectar plugin **MySQL** → autoinyecta `MYSQL_URL`.
+3. Definir variables de entorno:
+   - `SECRET_KEY` (valor aleatorio largo)
+   - `JWT_SECRET_KEY` (valor aleatorio largo)
+   - `FLASK_ENV=production`
+   - `ALLOWED_ORIGINS=https://<frontend-domain>.up.railway.app`
+   - `MAIL_USERNAME`, `MAIL_PASSWORD` (opcional, para envío de correos)
+4. Build y start los maneja `railway.json` automáticamente:
+   - El `buildCommand` corre `seed_railway.py` (idempotente, solo puebla si la BD está vacía).
+   - El `startCommand` levanta gunicorn en `$PORT`.
+
+### Frontend (servicio Node)
+
+1. Crear servicio desde el mismo repo, **Root Directory: `frontend`**.
+2. Definir variable:
+   - `VITE_API_URL=https://<backend-domain>.up.railway.app/api`
+   - **Importante:** debe estar definida antes del build, ya que Vite la inlinea.
+3. Build y start los maneja `railway.json`.
+
+### Credenciales de prueba (después del seed)
+
+| Usuario           | Contraseña     | Rol               |
+|-------------------|----------------|-------------------|
+| admin.mendoza     | Admin123!      | Administrador     |
+| marco.ibanez      | Tecnico123!    | Técnico Superior  |
+| ana.quispe        | Atencion123!   | Atención Cliente  |
+| roberto.flores    | Campo123!      | Técnico de Campo  |
 
 ---
 

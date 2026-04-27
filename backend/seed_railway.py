@@ -1,7 +1,14 @@
 """
 Script de inicializacion de BD para Railway.
-Se ejecuta como pre-deploy step dentro de la red de Railway.
-Orden: 1) crear tablas SQL  2) poblar datos  3) actualizar contraseñas
+Se ejecuta como build step (NIXPACKS_BUILD_CMD o railway.json buildCommand).
+
+Orden:
+  1) crear tablas SQL (idempotente: CREATE TABLE IF NOT EXISTS)
+  2) poblar datos (solo si la BD esta vacia)
+  3) actualizar contrasenas con hash werkzeug
+
+Si MYSQL_URL no esta definida, el script termina con codigo 0
+(para que el build no falle cuando no hay plugin MySQL conectado).
 """
 import os
 import sys
@@ -12,8 +19,8 @@ from werkzeug.security import generate_password_hash
 
 MYSQL_URL = os.getenv('MYSQL_URL', '')
 if not MYSQL_URL:
-    print("ERROR: MYSQL_URL no definida")
-    sys.exit(1)
+    print("[seed] MYSQL_URL no definida, omitiendo seed.")
+    sys.exit(0)
 
 parsed = urlparse(MYSQL_URL)
 base_dir = Path(__file__).parent
@@ -57,8 +64,9 @@ def run_sql_file(filepath):
             ok += 1
         except Exception as e:
             errors += 1
-            if 'Duplicate entry' not in str(e):
-                print(f"  WARN: {e}")
+            msg = str(e)
+            if 'Duplicate entry' not in msg and 'already exists' not in msg:
+                print(f"  WARN: {msg[:200]}")
     conn.commit()
     cursor.close()
     conn.close()
@@ -66,7 +74,7 @@ def run_sql_file(filepath):
 
 
 def seed_passwords():
-    print("\n>>> Actualizando contraseñas...")
+    print("\n>>> Actualizando contrasenas...")
     PASSWORDS = {
         'admin.mendoza':   'Admin123!',
         'marco.ibanez':    'Tecnico123!',
@@ -90,29 +98,53 @@ def seed_passwords():
         )
         if rows:
             actualizados += 1
-            print(f"  ✓ {username}")
+            print(f"  OK {username}")
         else:
-            print(f"  ✗ {username} — no encontrado")
+            print(f"  -- {username} no encontrado")
     conn.commit()
     cursor.close()
     conn.close()
-    print(f"    {actualizados} contraseñas actualizadas")
+    print(f"    {actualizados} contrasenas actualizadas")
 
 
-# Verificar si ya hay datos (evitar re-seed innecesario)
-try:
-    conn = get_conn()
-    cursor = conn.cursor()
-    cursor.execute("SHOW TABLES")
-    tablas = cursor.fetchall()
-    cursor.close()
-    conn.close()
-except Exception as e:
-    print(f"ERROR conectando a MySQL: {e}")
-    sys.exit(1)
+def bd_ya_poblada():
+    """Devuelve True si la tabla usuario existe y tiene >= 1 registro."""
+    try:
+        conn = get_conn()
+        cursor = conn.cursor()
+        cursor.execute("SHOW TABLES LIKE 'usuario'")
+        if not cursor.fetchone():
+            cursor.close()
+            conn.close()
+            return False
+        cursor.execute("SELECT COUNT(*) FROM usuario")
+        count = cursor.fetchone()[0]
+        cursor.close()
+        conn.close()
+        return count > 0
+    except Exception as e:
+        print(f"[seed] No se pudo verificar estado de BD: {e}")
+        return False
 
-run_sql_file(base_dir / 'scrip creacion BD.txt')
-run_sql_file(base_dir / 'scrip poblacion.txt')
-seed_passwords()
 
-print("\n✓ Seed completado.")
+def main():
+    try:
+        get_conn().close()
+    except Exception as e:
+        print(f"ERROR conectando a MySQL: {e}")
+        sys.exit(1)
+
+    if bd_ya_poblada():
+        print("[seed] BD ya poblada, solo refrescando contrasenas.")
+        seed_passwords()
+        print("\n[seed] OK")
+        return
+
+    run_sql_file(base_dir / 'scrip creacion BD.txt')
+    run_sql_file(base_dir / 'scrip poblacion.txt')
+    seed_passwords()
+    print("\n[seed] OK")
+
+
+if __name__ == '__main__':
+    main()
