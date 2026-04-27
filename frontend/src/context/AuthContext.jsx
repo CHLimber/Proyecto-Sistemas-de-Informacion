@@ -7,7 +7,7 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => localStorage.getItem('token'))
   const [usuario, setUsuario] = useState(() => {
     const u = localStorage.getItem('usuario')
-    return u ? JSON.parse(u) : null
+    return u && u !== 'undefined' ? JSON.parse(u) : null
   })
 
   async function login(username, password) {
