@@ -16,7 +16,7 @@ if not MYSQL_URL:
     sys.exit(1)
 
 parsed = urlparse(MYSQL_URL)
-base_dir = Path(__file__).parent.parent
+base_dir = Path(__file__).parent
 
 
 def get_conn():

@@ -1,0 +1,641 @@
+-- DROP DATABASE AWGPMCESE;
+
+CREATE DATABASE IF NOT EXISTS AWGPMCESE
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
+
+USE AWGPMCESE;
+
+-- ============================================================
+-- TABLAS CATÁLOGO
+-- ============================================================
+
+CREATE TABLE tipo_documento (
+  id 			INT AUTO_INCREMENT PRIMARY KEY,
+  nombre 		VARCHAR(150) NOT NULL,
+  descripcion 		TEXT
+);
+
+CREATE TABLE municipio (
+  id 			INT AUTO_INCREMENT PRIMARY KEY,
+  nombre 		VARCHAR(150) NOT NULL
+);
+
+CREATE TABLE tipo_establecimiento (
+  id 			INT AUTO_INCREMENT PRIMARY KEY,
+  nombre 		VARCHAR(150) NOT NULL,
+  descripcion 		TEXT
+);
+
+CREATE TABLE tipo_sistema (
+  id          		INT AUTO_INCREMENT PRIMARY KEY,
+  nombre      		VARCHAR(100) NOT NULL,
+  descripcion 		TEXT
+);
+
+CREATE TABLE telefono (
+  id     		INT AUTO_INCREMENT PRIMARY KEY,
+  numero 		VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE servicio (
+  id             	INT AUTO_INCREMENT PRIMARY KEY,
+  nombre         	VARCHAR(150) NOT NULL,
+  descripcion    	TEXT,
+  precio         	DECIMAL(12,2) NOT NULL,
+
+  UNIQUE KEY uk_servicio_nombre (nombre)
+);
+
+CREATE TABLE categoria (
+  id          		INT AUTO_INCREMENT PRIMARY KEY,
+  nombre      		VARCHAR(100) NOT NULL,
+  descripcion 		TEXT,
+  estado      		BOOLEAN DEFAULT TRUE,
+
+  UNIQUE KEY uk_categoria_nombre (nombre)
+);
+
+CREATE TABLE proveedor (
+  id           		INT AUTO_INCREMENT PRIMARY KEY,
+  nombre       		VARCHAR(150) NOT NULL,
+  email        		VARCHAR(100),
+  direccion    		VARCHAR(255),
+  departamento 		ENUM('Santa Cruz','La Paz','Cochabamba','Potosí','Chuquisaca','Tarija','Beni','Pando','Oruro'),
+  estado       		BOOLEAN DEFAULT TRUE,
+  fecha_registro 	DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+  UNIQUE KEY uk_proveedor_nombre (nombre)
+);
+
+CREATE TABLE telefono_proveedor (
+  id_telefono  		INT NOT NULL,
+  id_proveedor 		INT NOT NULL,
+
+  PRIMARY KEY (id_telefono, id_proveedor),
+
+  CONSTRAINT fk_tel_prov_telefono  FOREIGN KEY (id_telefono)  REFERENCES telefono(id)  ON DELETE CASCADE,
+  CONSTRAINT fk_tel_prov_proveedor FOREIGN KEY (id_proveedor) REFERENCES proveedor(id) ON DELETE CASCADE
+);
+
+CREATE TABLE producto (
+  id            	INT AUTO_INCREMENT PRIMARY KEY,
+  id_categoria  	INT NOT NULL,
+  codigo        	VARCHAR(20)  NOT NULL,
+  nombre        	VARCHAR(150) NOT NULL,
+  unidad_medida 	VARCHAR(30)  NOT NULL,
+  descripcion   	TEXT,
+  estado        	BOOLEAN DEFAULT TRUE,
+
+  UNIQUE KEY uk_producto_codigo (codigo),
+  
+  CONSTRAINT fk_producto_categoria FOREIGN KEY (id_categoria) REFERENCES categoria(id) ON DELETE RESTRICT,
+  
+  INDEX idx_producto_categoria (id_categoria)
+);
+
+CREATE TABLE producto_proveedor (
+  id_producto     	INT NOT NULL,
+  id_proveedor    	INT NOT NULL,
+  precio_unitario 	DECIMAL(12,2) NOT NULL,
+  es_principal    	BOOLEAN DEFAULT FALSE,
+  fecha_actualizacion 	DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  PRIMARY KEY (id_producto, id_proveedor),
+  CONSTRAINT fk_prod_prov_producto  FOREIGN KEY (id_producto)  REFERENCES producto(id)  ON DELETE CASCADE,
+  CONSTRAINT fk_prod_prov_proveedor FOREIGN KEY (id_proveedor) REFERENCES proveedor(id) ON DELETE CASCADE
+);
+
+-- ============================================================
+-- MÓDULO 1: ENTIDADES
+-- ============================================================
+
+CREATE TABLE entidad (
+  id             	INT AUTO_INCREMENT PRIMARY KEY,
+  nombre         	VARCHAR(150) NOT NULL,
+  tipo           	ENUM('natural','juridica') NOT NULL,
+  email          	VARCHAR(100),
+  cliente        	BOOLEAN DEFAULT FALSE,
+  empleado       	BOOLEAN DEFAULT FALSE,
+  fecha_registro 	DATETIME DEFAULT CURRENT_TIMESTAMP,
+  estado         	BOOLEAN DEFAULT TRUE,
+
+  INDEX idx_entidad_estado (estado)
+);
+
+CREATE TABLE entidad_natural (
+  id_entidad       	INT PRIMARY KEY,
+  ci               	VARCHAR(20) NOT NULL,
+  sexo             	CHAR(1),
+  fecha_nacimiento DATE,
+
+  CONSTRAINT fk_entidad_natural_entidad FOREIGN KEY (id_entidad) REFERENCES entidad(id) ON DELETE CASCADE,
+  UNIQUE KEY uk_entidad_natural_ci (ci)
+);
+
+CREATE TABLE entidad_juridica (
+  id_entidad      	INT PRIMARY KEY,
+  nit             	VARCHAR(20),
+  nombre_comercial 	VARCHAR(150),
+  razon_social    	VARCHAR(200) NOT NULL,
+
+  CONSTRAINT fk_entidad_juridica_entidad FOREIGN KEY (id_entidad) REFERENCES entidad(id) ON DELETE CASCADE,
+  UNIQUE KEY uk_entidad_juridica_nit (nit)
+);
+
+CREATE TABLE telefono_entidad (
+  id_telefono 		INT NOT NULL,
+  id_entidad  		INT NOT NULL,
+
+  PRIMARY KEY (id_telefono, id_entidad),
+  CONSTRAINT fk_telefono_entidad_telefono FOREIGN KEY (id_telefono) REFERENCES telefono(id) ON DELETE CASCADE,
+  CONSTRAINT fk_telefono_entidad_entidad  FOREIGN KEY (id_entidad)  REFERENCES entidad(id)  ON DELETE CASCADE
+);
+
+CREATE TABLE cargo (
+  id          		INT AUTO_INCREMENT PRIMARY KEY,
+  nombre      		VARCHAR(100) NOT NULL,
+  descripcion 		TEXT,
+
+  UNIQUE KEY uk_cargo_nombre (nombre)
+);
+
+CREATE TABLE empleado (
+  id             	INT AUTO_INCREMENT PRIMARY KEY,
+  id_entidad     	INT NOT NULL,
+  id_cargo       	INT,
+  estado         	BOOLEAN DEFAULT TRUE,
+  fecha_creacion 	DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT fk_empleado_entidad FOREIGN KEY (id_entidad) REFERENCES entidad(id) ON DELETE CASCADE,
+  CONSTRAINT fk_empleado_cargo   FOREIGN KEY (id_cargo)   REFERENCES cargo(id)   ON DELETE SET NULL,
+  
+  INDEX idx_empleado_estado (estado)
+);
+
+
+CREATE TABLE especialidad (
+  id          		INT AUTO_INCREMENT PRIMARY KEY,
+  nombre      		VARCHAR(100) NOT NULL,
+  descripcion 		TEXT,
+
+  UNIQUE KEY uk_especialidad_nombre (nombre)
+);
+
+CREATE TABLE empleado_especialidad (
+  id_empleado     	INT NOT NULL,
+  id_especialidad 	INT NOT NULL,
+
+  PRIMARY KEY (id_empleado, id_especialidad),
+  CONSTRAINT fk_emp_esp_empleado     FOREIGN KEY (id_empleado)     REFERENCES empleado(id)     ON DELETE CASCADE,
+  CONSTRAINT fk_emp_esp_especialidad FOREIGN KEY (id_especialidad) REFERENCES especialidad(id) ON DELETE CASCADE
+);
+
+CREATE TABLE establecimiento (
+  id                    INT AUTO_INCREMENT PRIMARY KEY,
+  id_entidad            INT,
+  id_municipio          INT,
+  id_tipo_establecimiento INT,
+  direccion		VARCHAR(255),
+  estado                BOOLEAN DEFAULT TRUE,
+  fecha_creacion        DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT fk_establecimiento_entidad   FOREIGN KEY (id_entidad)   REFERENCES entidad(id)             ON DELETE SET NULL,
+  CONSTRAINT fk_establecimiento_municipio FOREIGN KEY (id_municipio) REFERENCES municipio(id)           ON DELETE SET NULL,
+  CONSTRAINT fk_establecimiento_tipo      FOREIGN KEY (id_tipo_establecimiento) REFERENCES tipo_establecimiento(id) ON DELETE SET NULL,
+
+  INDEX idx_establecimiento_entidad (id_entidad),
+  INDEX idx_establecimiento_estado (estado)
+);
+
+CREATE TABLE sistema (
+  id                   INT AUTO_INCREMENT PRIMARY KEY,
+  id_establecimiento   INT NOT NULL,
+  id_tipo_sistema      INT NOT NULL,
+  nombre               VARCHAR(150),
+  tiene_mantenimiento  BOOLEAN DEFAULT FALSE,
+  periodicidad_dias    INT,
+  estado               BOOLEAN DEFAULT TRUE,
+  fecha_creacion       DATETIME DEFAULT CURRENT_TIMESTAMP,
+ 
+  CONSTRAINT fk_sistema_establecimiento FOREIGN KEY (id_establecimiento) REFERENCES establecimiento(id) ON DELETE RESTRICT,
+  CONSTRAINT fk_sistema_tipo            FOREIGN KEY (id_tipo_sistema)    REFERENCES tipo_sistema(id)    ON DELETE RESTRICT,
+  
+  INDEX idx_sistema_establecimiento (id_establecimiento),
+  INDEX idx_sistema_estado (estado)
+);
+
+-- ============================================================
+-- MÓDULO 2: AUTENTICACIÓN Y ROLES
+-- ============================================================
+
+CREATE TABLE rol (
+  id 			INT AUTO_INCREMENT PRIMARY KEY,
+  nombre 		VARCHAR(50) NOT NULL,
+  descripcion 		TEXT,
+
+  UNIQUE KEY uk_rol_nombre (nombre)
+);
+
+CREATE TABLE permiso (
+  id 			INT AUTO_INCREMENT PRIMARY KEY,
+  nombre 		VARCHAR(100) NOT NULL,
+  descripcion 		TEXT,
+
+  UNIQUE KEY uk_permiso_nombre (nombre)
+);
+
+CREATE TABLE rol_permiso (
+  id_rol 		INT NOT NULL,
+  id_permiso 		INT NOT NULL,
+
+  PRIMARY KEY (id_rol, id_permiso),
+  CONSTRAINT fk_rol_permiso_rol     FOREIGN KEY (id_rol)     REFERENCES rol(id)     ON DELETE CASCADE,
+  CONSTRAINT fk_rol_permiso_permiso FOREIGN KEY (id_permiso) REFERENCES permiso(id) ON DELETE CASCADE
+);
+
+CREATE TABLE usuario (
+  id 			INT AUTO_INCREMENT PRIMARY KEY,
+  id_rol      		INT NOT NULL,
+  id_empleado 		INT NOT NULL,
+  username    		VARCHAR(50)  NOT NULL,
+  password    		VARCHAR(255) NOT NULL,
+  email       		VARCHAR(100),
+  estado      		BOOLEAN DEFAULT TRUE,
+  ultimo_acceso    	DATETIME,
+  fecha_creacion   	DATETIME DEFAULT CURRENT_TIMESTAMP,
+  fecha_actualizacion 	DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  UNIQUE KEY uk_usuario_username (username),
+  
+  CONSTRAINT fk_usuario_rol FOREIGN KEY (id_rol) REFERENCES rol(id) ON DELETE RESTRICT,
+  CONSTRAINT fk_usuario_empleado FOREIGN KEY (id_empleado) REFERENCES empleado(id) ON DELETE RESTRICT
+);
+
+-- ============================================================
+-- MÓDULO 3:  COTIZACIONES
+-- ============================================================
+
+CREATE TABLE cotizacion (
+  id                 	INT AUTO_INCREMENT PRIMARY KEY,
+  codigo	 	VARCHAR(20) NOT NULL,
+  id_entidad         	INT NOT NULL,
+  id_servicio        	INT NOT NULL,
+  id_usuario         	INT NOT NULL,
+  id_sistema 		INT NOT NULL,
+  estado             	ENUM('borrador','enviada','aprobada','rechazada','vencida') DEFAULT 'borrador',
+  subtotal_productos 	DECIMAL(12,2) DEFAULT 0.00,
+  mano_de_obra       	DECIMAL(12,2) DEFAULT 0.00,
+  vigencia_dias      	INT DEFAULT 30,
+  observacion        	TEXT,
+  fecha_creacion     	DATETIME DEFAULT CURRENT_TIMESTAMP,
+  fecha_actualizacion 	DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  UNIQUE KEY uk_cotizacion_codigo (codigo),
+  
+  CONSTRAINT fk_cotizacion_entidad         FOREIGN KEY (id_entidad)         REFERENCES entidad(id)         ON DELETE RESTRICT,
+  CONSTRAINT fk_cotizacion_servicio        FOREIGN KEY (id_servicio)        REFERENCES servicio(id)        ON DELETE RESTRICT,
+  CONSTRAINT fk_cotizacion_usuario         FOREIGN KEY (id_usuario)         REFERENCES usuario(id)         ON DELETE RESTRICT,
+  CONSTRAINT fk_cotizacion_sistema         FOREIGN KEY (id_sistema)         REFERENCES sistema(id)         ON DELETE RESTRICT,
+  
+  INDEX idx_cotizacion_estado (estado),
+  INDEX idx_cotizacion_cliente (id_entidad),
+  INDEX idx_cotizacion_fecha (fecha_creacion)
+);
+
+CREATE TABLE cotizacion_detalle (
+  id              	INT AUTO_INCREMENT PRIMARY KEY,
+  id_cotizacion   	INT NOT NULL,
+  id_producto     	INT NOT NULL,
+  id_proveedor    	INT NOT NULL,
+  cantidad        	DECIMAL(10,2) NOT NULL,
+  precio_unitario 	DECIMAL(12,2) NOT NULL,
+  subtotal        	DECIMAL(12,2) NOT NULL,
+  observacion     	TEXT,
+
+  CONSTRAINT fk_cot_det_cotizacion FOREIGN KEY (id_cotizacion) REFERENCES cotizacion(id) ON DELETE CASCADE,
+  CONSTRAINT fk_cot_det_producto   FOREIGN KEY (id_producto)   REFERENCES producto(id)   ON DELETE RESTRICT,
+  CONSTRAINT fk_cot_det_proveedor  FOREIGN KEY (id_proveedor)  REFERENCES proveedor(id)  ON DELETE RESTRICT,
+  
+  INDEX idx_cotizacion_detalle_cotizacion (id_cotizacion)
+);
+
+
+-- ============================================================
+-- MÓDULO 4: GESTIÓN DE PROYECTOS
+-- (va antes de proyecto porque proyecto tiene FK a cotizacion)
+-- ============================================================
+
+CREATE TABLE estado_proyecto (
+  id          		INT AUTO_INCREMENT PRIMARY KEY,
+  nombre      		VARCHAR(50) NOT NULL,
+  orden       		INT NOT NULL,
+
+  UNIQUE KEY uk_estado_proyecto_nombre (nombre),
+  UNIQUE KEY uk_estado_proyecto_orden (orden)
+);
+
+CREATE TABLE proyecto (
+  id                 	INT AUTO_INCREMENT PRIMARY KEY,
+  codigo             	VARCHAR(20)  NOT NULL,
+  id_entidad         	INT NOT NULL,
+  id_establecimiento 	INT NOT NULL,
+  id_servicio        	INT NOT NULL,
+  id_estado_proyecto 	INT NOT NULL,
+  id_usuario         	INT NOT NULL,
+  id_cotizacion      	INT DEFAULT NULL,
+  id_sistema 			INT NOT NULL,
+  titulo             	VARCHAR(200) NOT NULL,
+  descripcion        	TEXT,
+  fecha_inicio       	DATE,
+  fecha_fin          	DATE,
+  fecha_creacion     	DATETIME DEFAULT CURRENT_TIMESTAMP,
+  fecha_actualizacion 	DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  UNIQUE KEY uk_proyecto_codigo (codigo),
+
+  CONSTRAINT fk_proyecto_entidad         FOREIGN KEY (id_entidad)         REFERENCES entidad(id)         ON DELETE RESTRICT,
+  CONSTRAINT fk_proyecto_establecimiento FOREIGN KEY (id_establecimiento) REFERENCES establecimiento(id) ON DELETE RESTRICT,
+  CONSTRAINT fk_proyecto_servicio        FOREIGN KEY (id_servicio)        REFERENCES servicio(id)        ON DELETE RESTRICT,
+  CONSTRAINT fk_proyecto_estado          FOREIGN KEY (id_estado_proyecto) REFERENCES estado_proyecto(id) ON DELETE RESTRICT,
+  CONSTRAINT fk_proyecto_usuario         FOREIGN KEY (id_usuario)         REFERENCES usuario(id)         ON DELETE RESTRICT,
+  CONSTRAINT fk_proyecto_cotizacion      FOREIGN KEY (id_cotizacion)      REFERENCES cotizacion(id)      ON DELETE SET NULL,
+  CONSTRAINT fk_proyecto_sistema       FOREIGN KEY (id_sistema)         REFERENCES sistema(id)         ON DELETE RESTRICT,
+
+  INDEX idx_proyecto_estado (id_estado_proyecto),
+  INDEX idx_proyecto_cliente (id_entidad),
+  INDEX idx_proyecto_fecha_creacion (fecha_creacion)
+);
+
+CREATE TABLE proyecto_historial (
+  id                	INT AUTO_INCREMENT PRIMARY KEY,
+  id_proyecto       	INT NOT NULL,
+  id_estado_anterior 	INT,
+  id_estado_nuevo   	INT NOT NULL,
+  id_usuario        	INT NOT NULL,
+  fecha_cambio      	DATETIME DEFAULT CURRENT_TIMESTAMP,
+  observacion       	TEXT,
+
+  CONSTRAINT fk_proy_hist_proyecto        FOREIGN KEY (id_proyecto)        REFERENCES proyecto(id)        ON DELETE CASCADE,
+  CONSTRAINT fk_proy_hist_estado_anterior FOREIGN KEY (id_estado_anterior) REFERENCES estado_proyecto(id) ON DELETE SET NULL,
+  CONSTRAINT fk_proy_hist_estado_nuevo    FOREIGN KEY (id_estado_nuevo)    REFERENCES estado_proyecto(id) ON DELETE RESTRICT,
+  CONSTRAINT fk_proy_hist_usuario         FOREIGN KEY (id_usuario)         REFERENCES usuario(id)         ON DELETE RESTRICT,
+  
+  INDEX idx_proyecto_historial_proyecto (id_proyecto),
+  INDEX idx_proyecto_historial_fecha (fecha_cambio)
+);
+
+-- ============================================================
+-- MÓDULO 5: ÓRDENES DE TRABAJO
+-- ============================================================
+
+CREATE TABLE estado_orden (
+  id          		INT AUTO_INCREMENT PRIMARY KEY,
+  nombre      		VARCHAR(50) NOT NULL,
+  orden       		INT NOT NULL,
+
+  UNIQUE KEY uk_estado_orden_nombre (nombre),
+  UNIQUE KEY uk_estado_orden_orden (orden)
+);
+
+CREATE TABLE orden_trabajo (
+  id               	INT AUTO_INCREMENT PRIMARY KEY,
+  codigo	     	VARCHAR(20) NOT NULL,
+  id_proyecto      	INT NOT NULL,
+  id_servicio      	INT NOT NULL,
+  id_estado_orden  	INT NOT NULL,
+  id_usuario       	INT NOT NULL,
+  descripcion      	TEXT,
+  fecha_ejecucion  	DATE,
+  tiempo_estimado  	INT COMMENT 'Horas estimados para la tarea',
+  observaciones    	TEXT,
+  fecha_creacion   	DATETIME DEFAULT CURRENT_TIMESTAMP,
+  fecha_actualizacion 	DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  UNIQUE KEY uk_orden_codigo (codigo),
+
+  CONSTRAINT fk_orden_proyecto FOREIGN KEY (id_proyecto)     REFERENCES proyecto(id)     ON DELETE CASCADE,
+  CONSTRAINT fk_orden_servicio FOREIGN KEY (id_servicio)     REFERENCES servicio(id)     ON DELETE RESTRICT,
+  CONSTRAINT fk_orden_estado   FOREIGN KEY (id_estado_orden) REFERENCES estado_orden(id) ON DELETE RESTRICT,
+  CONSTRAINT fk_orden_usuario  FOREIGN KEY (id_usuario)      REFERENCES usuario(id)      ON DELETE RESTRICT,
+
+  INDEX idx_orden_proyecto (id_proyecto),
+  INDEX idx_orden_fecha_ejecucion (fecha_ejecucion)
+);
+
+CREATE TABLE orden_empleado (
+  id_orden_trabajo      INT NOT NULL,
+  id_empleado   		INT NOT NULL,
+  es_responsable 		BOOLEAN DEFAULT FALSE,
+
+  PRIMARY KEY (id_orden_trabajo, id_empleado),
+  CONSTRAINT fk_orden_emp_orden    FOREIGN KEY (id_orden_trabajo)   REFERENCES orden_trabajo(id) ON DELETE CASCADE,
+  CONSTRAINT fk_orden_emp_empleado FOREIGN KEY (id_empleado) 		REFERENCES empleado(id)      ON DELETE RESTRICT
+);
+
+CREATE TABLE orden_producto (
+  id_orden_trabajo 	INT NOT NULL,
+  id_producto      	INT NOT NULL,
+  cantidad_asignada 	DECIMAL(10,2) NOT NULL,
+  cantidad_usada   	DECIMAL(10,2),
+  observacion      	TEXT,
+
+  PRIMARY KEY (id_orden_trabajo, id_producto),
+  CONSTRAINT fk_ord_prod_orden    FOREIGN KEY (id_orden_trabajo) REFERENCES orden_trabajo(id) ON DELETE CASCADE,
+  CONSTRAINT fk_ord_prod_producto FOREIGN KEY (id_producto)      REFERENCES producto(id)      ON DELETE RESTRICT,
+
+  INDEX idx_orden_producto_orden (id_orden_trabajo),
+  INDEX idx_orden_producto_producto (id_producto)
+);
+
+CREATE TABLE orden_historial (
+  id                	INT AUTO_INCREMENT PRIMARY KEY,
+  id_orden_trabajo  	INT NOT NULL,
+  id_estado_anterior 	INT,
+  id_estado_nuevo   	INT NOT NULL,
+  id_usuario        	INT NOT NULL,
+  fecha_cambio      	DATETIME DEFAULT CURRENT_TIMESTAMP,
+  observacion       	TEXT,
+
+  CONSTRAINT fk_ord_hist_orden           FOREIGN KEY (id_orden_trabajo)   REFERENCES orden_trabajo(id) ON DELETE CASCADE,
+  CONSTRAINT fk_ord_hist_estado_anterior FOREIGN KEY (id_estado_anterior) REFERENCES estado_orden(id)  ON DELETE SET NULL,
+  CONSTRAINT fk_ord_hist_estado_nuevo    FOREIGN KEY (id_estado_nuevo)    REFERENCES estado_orden(id)  ON DELETE RESTRICT,
+  CONSTRAINT fk_ord_hist_usuario         FOREIGN KEY (id_usuario)         REFERENCES usuario(id)       ON DELETE RESTRICT,
+
+  INDEX idx_orden_historial_orden (id_orden_trabajo),
+  INDEX idx_orden_historial_fecha (fecha_cambio)
+);
+
+-- ============================================================
+-- MÓDULO 6: MANTENIMIENTOS
+-- ============================================================
+
+CREATE TABLE mantenimiento (
+  id                     INT AUTO_INCREMENT PRIMARY KEY,
+  id_sistema             INT NOT NULL,   
+  id_orden_trabajo       INT,
+  id_usuario             INT,
+  tipo                   ENUM('preventivo','correctivo') NOT NULL,
+  fecha_programada       DATE NOT NULL,
+  periodicidad_dias      INT,            
+  estado                 ENUM('pendiente','confirmado','reprogramado','completado','vencido'),
+  creado_automaticamente BOOLEAN DEFAULT FALSE,  
+  fecha_creacion         DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT fk_mant_sistema FOREIGN KEY (id_sistema)       REFERENCES sistema(id)       ON DELETE RESTRICT,
+  CONSTRAINT fk_mant_orden    FOREIGN KEY (id_orden_trabajo)  REFERENCES orden_trabajo(id) ON DELETE SET NULL,
+  CONSTRAINT fk_mant_usuario  FOREIGN KEY (id_usuario)        REFERENCES usuario(id)       ON DELETE SET NULL,
+
+  INDEX idx_mantenimiento_sistema (id_sistema),
+  INDEX idx_mantenimiento_estado (estado),
+  INDEX idx_mantenimiento_fecha_programada (fecha_programada)
+);
+
+CREATE TABLE alerta_mantenimiento (
+  id                 	INT AUTO_INCREMENT PRIMARY KEY,
+  id_mantenimiento   	INT NOT NULL,
+  id_usuario         	INT NOT NULL,
+  id_establecimiento 	INT NOT NULL,
+  fecha              	DATETIME DEFAULT CURRENT_TIMESTAMP,
+  estado             	ENUM('pendiente','enviada','leida','completada') DEFAULT 'pendiente',
+  observacion        	TEXT,
+
+  CONSTRAINT fk_alerta_mant_mant    FOREIGN KEY (id_mantenimiento)   REFERENCES mantenimiento(id)    ON DELETE CASCADE,
+  CONSTRAINT fk_alerta_mant_usuario FOREIGN KEY (id_usuario)         REFERENCES usuario(id)          ON DELETE RESTRICT,
+  CONSTRAINT fk_alerta_mant_estab   FOREIGN KEY (id_establecimiento) REFERENCES establecimiento(id)  ON DELETE CASCADE,
+
+  INDEX idx_alerta_mant_estado (estado),
+  INDEX idx_alerta_mant_fecha (fecha)
+);
+
+-- ============================================================
+-- MÓDULO 7: BITÁCORAS Y DOCUMENTOS
+-- ============================================================
+
+CREATE TABLE bitacora_cliente (
+  id             	INT AUTO_INCREMENT PRIMARY KEY,
+  id_entidad     	INT NOT NULL,
+  id_usuario     	INT NOT NULL,
+  nota           	TEXT NOT NULL,
+  fecha_creacion 	DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT fk_bit_cli_entidad FOREIGN KEY (id_entidad) REFERENCES entidad(id) ON DELETE CASCADE,
+  CONSTRAINT fk_bit_cli_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id) ON DELETE RESTRICT,
+
+  INDEX idx_bitacora_cliente_entidad (id_entidad),
+  INDEX idx_bitacora_cliente_fecha (fecha_creacion)
+);
+
+CREATE TABLE bitacora_proyecto (
+  id             	INT AUTO_INCREMENT PRIMARY KEY,
+  id_proyecto    	INT NOT NULL,
+  id_usuario     	INT NOT NULL,
+  nota           	TEXT NOT NULL,
+  fecha_creacion 	DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT fk_bit_proy_proyecto FOREIGN KEY (id_proyecto) REFERENCES proyecto(id) ON DELETE CASCADE,
+  CONSTRAINT fk_bit_proy_usuario  FOREIGN KEY (id_usuario)  REFERENCES usuario(id)  ON DELETE RESTRICT,
+  
+  INDEX idx_bitacora_proyecto_proyecto (id_proyecto),
+  INDEX idx_bitacora_proyecto_fecha (fecha_creacion)
+);
+
+CREATE TABLE documento (
+  id               	INT AUTO_INCREMENT PRIMARY KEY,
+  id_proyecto      	INT,
+  id_entidad       	INT,
+  id_usuario       	INT NOT NULL,
+  id_tipo_documento 	INT NOT NULL,
+  nombre           	VARCHAR(255) NOT NULL,
+  ruta             	VARCHAR(500) NOT NULL,
+  fecha_subida     	DATETIME DEFAULT CURRENT_TIMESTAMP,
+  descripcion      	TEXT,
+
+  CONSTRAINT fk_doc_proyecto  FOREIGN KEY (id_proyecto)       REFERENCES proyecto(id)       ON DELETE CASCADE,
+  CONSTRAINT fk_doc_entidad   FOREIGN KEY (id_entidad)        REFERENCES entidad(id)         ON DELETE CASCADE,
+  CONSTRAINT fk_doc_usuario   FOREIGN KEY (id_usuario)        REFERENCES usuario(id)         ON DELETE RESTRICT,
+  CONSTRAINT fk_doc_tipo      FOREIGN KEY (id_tipo_documento) REFERENCES tipo_documento(id)  ON DELETE RESTRICT,
+  INDEX idx_documento_proyecto (id_proyecto),
+  INDEX idx_documento_fecha (fecha_subida)
+);
+
+-- ============================================================
+-- MÓDULO 8: FINANZAS BÁSICAS
+-- ============================================================
+
+CREATE TABLE pago (
+  id             	INT AUTO_INCREMENT PRIMARY KEY,
+  id_proyecto    	INT NOT NULL,
+  id_usuario     	INT NOT NULL,
+  tipo_pago      	ENUM('anticipo','pago_parcial','pago_final','otro') NOT NULL,
+  monto          	DECIMAL(12,2) NOT NULL,
+  fecha_pago     	DATE NOT NULL,
+  metodo	    	ENUM('efectivo','transferencia','QR','otro') NOT NULL,
+  observacion    	TEXT,
+  fecha_registro 	DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT fk_pago_proyecto FOREIGN KEY (id_proyecto) REFERENCES proyecto(id) ON DELETE CASCADE,
+  CONSTRAINT fk_pago_usuario  FOREIGN KEY (id_usuario)  REFERENCES usuario(id)  ON DELETE RESTRICT,
+
+  INDEX idx_pago_proyecto (id_proyecto),
+  INDEX idx_pago_fecha (fecha_pago),
+  INDEX idx_pago_tipo (tipo_pago)
+);
+
+CREATE TABLE gasto_orden (
+  id             	INT AUTO_INCREMENT PRIMARY KEY,
+  id_orden       	INT NOT NULL,
+  id_usuario     	INT NOT NULL,
+  concepto       	ENUM('materiales','viaticos','transporte','otro') NOT NULL,
+  descripcion    	TEXT,
+  monto          	DECIMAL(12,2) NOT NULL,
+  fecha_gasto    	DATE NOT NULL,
+  fecha_registro 	DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT fk_gasto_orden   FOREIGN KEY (id_orden)    REFERENCES orden_trabajo(id) ON DELETE CASCADE,
+  CONSTRAINT fk_gasto_usuario FOREIGN KEY (id_usuario)  REFERENCES usuario(id)       ON DELETE RESTRICT,
+  INDEX idx_gasto_orden_orden (id_orden),
+  INDEX idx_gasto_orden_fecha (fecha_gasto)
+);
+
+-- ============================================================
+-- MÓDULO 9: NOTIFICACIONES
+-- ============================================================
+
+CREATE TABLE notificacion (
+  id                 	INT AUTO_INCREMENT PRIMARY KEY,
+  id_usuario         	INT NOT NULL,
+  titulo             	VARCHAR(200) NOT NULL,
+  mensaje            	TEXT NOT NULL,
+  tipo               	ENUM('alerta_mantenimiento','orden_asignada','proyecto_actualizado','pago_registrado','stock_critico') NOT NULL,
+  leida              	BOOLEAN DEFAULT FALSE,
+  url                	VARCHAR(300),
+  fecha_creacion     	DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT fk_notif_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id) ON DELETE CASCADE,
+  INDEX idx_notificacion_usuario (id_usuario),
+  INDEX idx_notificacion_fecha (fecha_creacion),
+  INDEX idx_notificacion_tipo (tipo)
+);
+
+-- ============================================================
+-- VISTA: cuentas_por_cobrar
+-- ============================================================
+
+CREATE OR REPLACE VIEW cuentas_por_cobrar AS
+SELECT
+    p.id                                                              AS id_proyecto,
+    p.codigo                                                          AS codigo_proyecto,
+    e.nombre                                                          AS cliente,
+    (COALESCE(c.subtotal_productos, 0) + COALESCE(c.mano_de_obra, 0)) AS monto_total_cotizacion,
+    COALESCE(SUM(pg.monto), 0)                                        AS total_pagado,
+    ((COALESCE(c.subtotal_productos, 0) + COALESCE(c.mano_de_obra, 0))
+        - COALESCE(SUM(pg.monto), 0))                                 AS saldo_pendiente
+FROM proyecto p
+INNER JOIN entidad e    ON p.id_entidad   = e.id
+LEFT  JOIN cotizacion c ON p.id_cotizacion = c.id
+LEFT  JOIN pago pg      ON p.id            = pg.id_proyecto
+WHERE p.id_cotizacion IS NOT NULL
+GROUP BY p.id, p.codigo, e.nombre, c.subtotal_productos, c.mano_de_obra
+HAVING saldo_pendiente > 0
+ORDER BY saldo_pendiente DESC;
