@@ -107,6 +107,36 @@ def seed_passwords():
     print(f"    {actualizados} contrasenas actualizadas")
 
 
+def aplicar_migraciones_pendientes():
+    """ALTER TABLE idempotentes para BDs creadas con DDL anterior.
+    Si la columna ya existe, se omite (consulta information_schema)."""
+    columnas_a_agregar = [
+        ('usuario', 'intentos_fallidos', 'SMALLINT NOT NULL DEFAULT 0'),
+        ('usuario', 'bloqueado_hasta',   'DATETIME NULL'),
+        ('usuario', 'veces_bloqueado',   'SMALLINT NOT NULL DEFAULT 0'),
+        ('usuario', 'ultima_salida',     'DATETIME NULL'),
+    ]
+    db_name = parsed.path.lstrip('/')
+    conn = get_conn()
+    cursor = conn.cursor()
+    agregadas = 0
+    for tabla, columna, definicion in columnas_a_agregar:
+        cursor.execute(
+            "SELECT COUNT(*) FROM information_schema.columns "
+            "WHERE table_schema=%s AND table_name=%s AND column_name=%s",
+            (db_name, tabla, columna),
+        )
+        if cursor.fetchone()[0] == 0:
+            cursor.execute(f"ALTER TABLE {tabla} ADD COLUMN {columna} {definicion}")
+            agregadas += 1
+            print(f"  + {tabla}.{columna}")
+    conn.commit()
+    cursor.close()
+    conn.close()
+    if agregadas:
+        print(f">>> {agregadas} columnas agregadas")
+
+
 def bd_ya_poblada():
     """Devuelve True si la tabla usuario existe y tiene >= 1 registro."""
     try:
@@ -135,13 +165,15 @@ def main():
         sys.exit(1)
 
     if bd_ya_poblada():
-        print("[seed] BD ya poblada, solo refrescando contrasenas.")
+        print("[seed] BD ya poblada, aplicando migraciones y refrescando contrasenas.")
+        aplicar_migraciones_pendientes()
         seed_passwords()
         print("\n[seed] OK")
         return
 
     run_sql_file(base_dir / 'scrip creacion BD.txt')
     run_sql_file(base_dir / 'scrip poblacion.txt')
+    aplicar_migraciones_pendientes()
     seed_passwords()
     print("\n[seed] OK")
 
