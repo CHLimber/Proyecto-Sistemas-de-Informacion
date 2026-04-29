@@ -74,8 +74,9 @@ def crear():
         )
         db.session.add(juridica)
 
+    id_usuario = int(usuario)
     db.session.commit()
-    log('CREAR_ENTIDAD', f"Entidad '{entidad.nombre}' ({tipo}) creada", usuario)
+    log('CREAR_ENTIDAD', f"Entidad '{entidad.nombre}' ({tipo}) creada", id_usuario=id_usuario, modulo='entidades')
     return jsonify(_serializar(entidad)), 201
 
 
@@ -123,7 +124,7 @@ def actualizar(id_entidad):
             entidad.juridica.nit = nit_nuevo
 
     db.session.commit()
-    log('ACTUALIZAR_ENTIDAD', f"Entidad {id_entidad} actualizada", usuario)
+    log('ACTUALIZAR_ENTIDAD', f"Entidad {id_entidad} actualizada", id_usuario=int(usuario), modulo='entidades')
     return jsonify(_serializar(entidad))
 
 
@@ -135,7 +136,7 @@ def desactivar(id_entidad):
     entidad.estado = False
     db.session.commit()
     usuario = get_jwt_identity()
-    log('DESACTIVAR_ENTIDAD', f"Entidad {id_entidad} desactivada", usuario)
+    log('DESACTIVAR_ENTIDAD', f"Entidad {id_entidad} desactivada", id_usuario=int(usuario), modulo='entidades')
     return jsonify({'mensaje': 'Entidad desactivada'})
 
 
@@ -193,7 +194,7 @@ def crear_sistema(id_entidad):
     )
     db.session.add(sistema)
     db.session.commit()
-    log('CREAR_SISTEMA', f"Sistema '{sistema.nombre}' creado para entidad {id_entidad}", usuario)
+    log('CREAR_SISTEMA', f"Sistema '{sistema.nombre}' creado para entidad {id_entidad}", id_usuario=int(usuario), modulo='entidades')
     return jsonify(_serializar_sistema(sistema)), 201
 
 

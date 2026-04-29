@@ -112,7 +112,7 @@ def crear():
         db.session.add(detalle)
 
     db.session.commit()
-    log('CREAR_COTIZACION', f"Cotización {codigo} creada para entidad {data['id_entidad']}", username)
+    log('CREAR_COTIZACION', f"Cotización {codigo} creada para entidad {data['id_entidad']}", id_usuario=id_usuario, modulo='cotizaciones')
     return jsonify(_serializar(cotizacion, detalle=True)), 201
 
 
@@ -142,7 +142,8 @@ def actualizar(id_cotizacion):
         c.observacion = data['observacion']
 
     db.session.commit()
-    log('ACTUALIZAR_COTIZACION', f"Cotización {c.codigo} actualizada a estado '{c.estado}'", username)
+    log('ACTUALIZAR_COTIZACION', f"Cotización {c.codigo} actualizada a estado '{c.estado}'",
+        id_usuario=_get_usuario_id(username), modulo='cotizaciones')
     return jsonify(_serializar(c, detalle=True))
 
 
@@ -161,7 +162,8 @@ def cambiar_estado(id_cotizacion):
 
     c.estado = nuevo_estado
     db.session.commit()
-    log('CAMBIAR_ESTADO_COTIZACION', f"Cotización {c.codigo} → {nuevo_estado}", username)
+    log('CAMBIAR_ESTADO_COTIZACION', f"Cotización {c.codigo} → {nuevo_estado}",
+        id_usuario=_get_usuario_id(username), modulo='cotizaciones')
     return jsonify(_serializar(c))
 
 

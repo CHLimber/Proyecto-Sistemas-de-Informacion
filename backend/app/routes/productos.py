@@ -52,7 +52,8 @@ def crear():
     )
     db.session.add(producto)
     db.session.commit()
-    log('CREAR_PRODUCTO', f"Producto '{producto.nombre}' (cod: {producto.codigo}) creado", usuario)
+    log('CREAR_PRODUCTO', f"Producto '{producto.nombre}' (cod: {producto.codigo}) creado",
+        id_usuario=int(usuario), modulo='productos')
     return jsonify(_serializar(producto)), 201
 
 
@@ -83,7 +84,7 @@ def actualizar(id_producto):
         p.id_categoria = data['id_categoria']
 
     db.session.commit()
-    log('ACTUALIZAR_PRODUCTO', f"Producto {id_producto} actualizado", usuario)
+    log('ACTUALIZAR_PRODUCTO', f"Producto {id_producto} actualizado", id_usuario=int(usuario), modulo='productos')
     return jsonify(_serializar(p))
 
 
@@ -95,7 +96,7 @@ def desactivar(id_producto):
     p.estado = False
     db.session.commit()
     usuario = get_jwt_identity()
-    log('DESACTIVAR_PRODUCTO', f"Producto {id_producto} desactivado", usuario)
+    log('DESACTIVAR_PRODUCTO', f"Producto {id_producto} desactivado", id_usuario=int(usuario), modulo='productos')
     return jsonify({'mensaje': 'Producto desactivado'})
 
 
