@@ -108,13 +108,42 @@ def seed_passwords():
 
 
 def aplicar_migraciones_pendientes():
-    """ALTER TABLE idempotentes para BDs creadas con DDL anterior.
-    Si la columna ya existe, se omite (consulta information_schema)."""
+    """ALTER TABLE idempotentes y CREATE TABLE IF NOT EXISTS para BDs creadas con DDL anterior."""
     columnas_a_agregar = [
         ('usuario', 'intentos_fallidos', 'SMALLINT NOT NULL DEFAULT 0'),
         ('usuario', 'bloqueado_hasta',   'DATETIME NULL'),
         ('usuario', 'veces_bloqueado',   'SMALLINT NOT NULL DEFAULT 0'),
         ('usuario', 'ultima_salida',     'DATETIME NULL'),
+    ]
+    tablas_a_crear = [
+        (
+            'bitacora',
+            """CREATE TABLE IF NOT EXISTS bitacora (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                id_usuario INT NULL,
+                accion VARCHAR(50) NOT NULL,
+                modulo VARCHAR(50) NULL,
+                descripcion TEXT NULL,
+                ip VARCHAR(45) NULL,
+                fecha DATETIME NOT NULL DEFAULT NOW(),
+                CONSTRAINT fk_bitacora_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id),
+                INDEX ix_bitacora_id_usuario (id_usuario),
+                INDEX ix_bitacora_accion (accion),
+                INDEX ix_bitacora_modulo (modulo),
+                INDEX ix_bitacora_fecha (fecha)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4""",
+        ),
+        (
+            'bitacora_detalle',
+            """CREATE TABLE IF NOT EXISTS bitacora_detalle (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                id_bitacora INT NOT NULL,
+                campo VARCHAR(100) NOT NULL,
+                valor_anterior TEXT NULL,
+                valor_nuevo TEXT NULL,
+                CONSTRAINT fk_bitdet_bitacora FOREIGN KEY (id_bitacora) REFERENCES bitacora(id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4""",
+        ),
     ]
     db_name = parsed.path.lstrip('/')
     conn = get_conn()
@@ -130,11 +159,21 @@ def aplicar_migraciones_pendientes():
             cursor.execute(f"ALTER TABLE {tabla} ADD COLUMN {columna} {definicion}")
             agregadas += 1
             print(f"  + {tabla}.{columna}")
+    for nombre_tabla, ddl in tablas_a_crear:
+        cursor.execute(
+            "SELECT COUNT(*) FROM information_schema.tables "
+            "WHERE table_schema=%s AND table_name=%s",
+            (db_name, nombre_tabla),
+        )
+        if cursor.fetchone()[0] == 0:
+            cursor.execute(ddl)
+            agregadas += 1
+            print(f"  + tabla {nombre_tabla}")
     conn.commit()
     cursor.close()
     conn.close()
     if agregadas:
-        print(f">>> {agregadas} columnas agregadas")
+        print(f">>> {agregadas} cambios aplicados")
 
 
 def bd_ya_poblada():
