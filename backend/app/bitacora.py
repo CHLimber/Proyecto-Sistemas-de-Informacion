@@ -39,4 +39,4 @@ def log(accion: str, descripcion: str, usuario: str = None,
 
         db.session.commit()
     except Exception:
-        pass
+        db.session.rollback()
