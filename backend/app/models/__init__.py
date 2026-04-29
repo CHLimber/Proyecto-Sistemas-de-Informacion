@@ -10,3 +10,4 @@ from .mantenimiento import Mantenimiento, AlertaMantenimiento
 from .bitacora_doc import BitacoraCliente, BitacoraProyecto, Documento
 from .finanzas import Pago, GastoOrden
 from .notificacion import Notificacion
+from .auditoria import Bitacora, BitacoraDetalle

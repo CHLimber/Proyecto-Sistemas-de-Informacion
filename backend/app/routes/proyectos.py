@@ -91,7 +91,7 @@ def crear():
     db.session.add(historial)
     db.session.commit()
 
-    log('CREAR_PROYECTO', f"Proyecto '{codigo}' creado", str(id_usuario))
+    log('CREAR_PROYECTO', f"Proyecto '{codigo}' creado", id_usuario=id_usuario, modulo='proyectos')
     return jsonify(_serializar(proyecto, detalle=True)), 201
 
 
@@ -103,6 +103,9 @@ def actualizar(id_proyecto):
     data = request.get_json()
     id_usuario = int(get_jwt_identity())
 
+    campos_seguimiento = ('titulo', 'descripcion', 'fecha_inicio', 'fecha_fin', 'id_estado_proyecto')
+    antes = {c: getattr(p, c) for c in campos_seguimiento}
+
     if 'titulo' in data:
         p.titulo = data['titulo'].strip()
     if 'descripcion' in data:
@@ -113,11 +116,10 @@ def actualizar(id_proyecto):
         p.fecha_fin = data['fecha_fin'] or None
 
     if 'id_estado_proyecto' in data and data['id_estado_proyecto'] != p.id_estado_proyecto:
-        estado_anterior = p.id_estado_proyecto
         p.id_estado_proyecto = data['id_estado_proyecto']
         historial = ProyectoHistorial(
             id_proyecto=p.id,
-            id_estado_anterior=estado_anterior,
+            id_estado_anterior=antes['id_estado_proyecto'],
             id_estado_nuevo=data['id_estado_proyecto'],
             id_usuario=id_usuario,
             observacion=data.get('observacion_cambio', ''),
@@ -125,7 +127,14 @@ def actualizar(id_proyecto):
         db.session.add(historial)
 
     db.session.commit()
-    log('ACTUALIZAR_PROYECTO', f"Proyecto {id_proyecto} actualizado", str(id_usuario))
+
+    cambios = [
+        {'campo': c, 'anterior': antes[c], 'nuevo': getattr(p, c)}
+        for c in campos_seguimiento
+        if c in data and str(antes[c] or '') != str(getattr(p, c) or '')
+    ]
+    log('ACTUALIZAR_PROYECTO', f"Proyecto {id_proyecto} actualizado",
+        id_usuario=id_usuario, modulo='proyectos', detalles=cambios or None)
     return jsonify(_serializar(p, detalle=True))
 
 

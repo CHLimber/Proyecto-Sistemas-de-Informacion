@@ -66,7 +66,8 @@ def registrar_pago():
     )
     db.session.add(pago)
     db.session.commit()
-    log('REGISTRAR_PAGO', f"Pago {data['tipo_pago']} de Bs {monto} registrado para proyecto {data['id_proyecto']}", str(id_usuario))
+    log('REGISTRAR_PAGO', f"Pago {data['tipo_pago']} de Bs {monto} registrado para proyecto {data['id_proyecto']}",
+        id_usuario=id_usuario, modulo='finanzas')
     return jsonify(_serializar_pago(pago)), 201
 
 
@@ -111,7 +112,8 @@ def registrar_gasto():
     )
     db.session.add(gasto)
     db.session.commit()
-    log('REGISTRAR_GASTO', f"Gasto '{data['concepto']}' de Bs {monto} en orden {data['id_orden']}", str(id_usuario))
+    log('REGISTRAR_GASTO', f"Gasto '{data['concepto']}' de Bs {monto} en orden {data['id_orden']}",
+        id_usuario=id_usuario, modulo='finanzas')
     return jsonify(_serializar_gasto(gasto)), 201
 
 

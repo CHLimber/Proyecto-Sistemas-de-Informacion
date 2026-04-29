@@ -105,7 +105,8 @@ def crear():
     db.session.add(hist)
     db.session.commit()
 
-    log('CREAR_ORDEN', f"Orden {codigo} creada para proyecto {data['id_proyecto']}", str(id_usuario))
+    log('CREAR_ORDEN', f"Orden {codigo} creada para proyecto {data['id_proyecto']}",
+        id_usuario=id_usuario, modulo='ordenes')
     return jsonify(_serializar(orden, detalle=True)), 201
 
 
@@ -117,6 +118,9 @@ def actualizar(id_orden):
     data = request.get_json()
     id_usuario = int(get_jwt_identity())
 
+    campos_seguimiento = ('descripcion', 'observaciones', 'fecha_ejecucion', 'tiempo_estimado', 'id_estado_orden')
+    antes = {c: getattr(o, c) for c in campos_seguimiento}
+
     if 'descripcion' in data:
         o.descripcion = data['descripcion'].strip() or None
     if 'observaciones' in data:
@@ -127,11 +131,10 @@ def actualizar(id_orden):
         o.tiempo_estimado = data['tiempo_estimado'] or None
 
     if 'id_estado_orden' in data and data['id_estado_orden'] != o.id_estado_orden:
-        estado_anterior = o.id_estado_orden
         o.id_estado_orden = data['id_estado_orden']
         hist = OrdenHistorial(
             id_orden_trabajo=o.id,
-            id_estado_anterior=estado_anterior,
+            id_estado_anterior=antes['id_estado_orden'],
             id_estado_nuevo=data['id_estado_orden'],
             id_usuario=id_usuario,
             observacion=data.get('observacion_cambio', ''),
@@ -139,7 +142,14 @@ def actualizar(id_orden):
         db.session.add(hist)
 
     db.session.commit()
-    log('ACTUALIZAR_ORDEN', f"Orden {id_orden} actualizada", str(id_usuario))
+
+    cambios = [
+        {'campo': c, 'anterior': antes[c], 'nuevo': getattr(o, c)}
+        for c in campos_seguimiento
+        if c in data and str(antes[c] or '') != str(getattr(o, c) or '')
+    ]
+    log('ACTUALIZAR_ORDEN', f"Orden {id_orden} actualizada",
+        id_usuario=id_usuario, modulo='ordenes', detalles=cambios or None)
     return jsonify(_serializar(o, detalle=True))
 
 

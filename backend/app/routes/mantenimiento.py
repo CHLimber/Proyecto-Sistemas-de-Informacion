@@ -53,7 +53,8 @@ def crear():
     )
     db.session.add(mantenimiento)
     db.session.commit()
-    log('CREAR_MANTENIMIENTO', f"Mantenimiento {data['tipo']} programado para sistema {data['id_sistema']}", str(id_usuario))
+    log('CREAR_MANTENIMIENTO', f"Mantenimiento {data['tipo']} programado para sistema {data['id_sistema']}",
+        id_usuario=id_usuario, modulo='mantenimiento')
     return jsonify(_serializar(mantenimiento)), 201
 
 
@@ -78,7 +79,8 @@ def actualizar(id_mantenimiento):
         m.id_orden_trabajo = data['id_orden_trabajo'] or None
 
     db.session.commit()
-    log('ACTUALIZAR_MANTENIMIENTO', f"Mantenimiento {id_mantenimiento} → estado '{m.estado}'", str(id_usuario))
+    log('ACTUALIZAR_MANTENIMIENTO', f"Mantenimiento {id_mantenimiento} → estado '{m.estado}'",
+        id_usuario=id_usuario, modulo='mantenimiento')
     return jsonify(_serializar(m))
 
 

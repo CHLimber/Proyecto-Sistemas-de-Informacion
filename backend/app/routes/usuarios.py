@@ -74,7 +74,7 @@ def crear():
     )
     db.session.add(usuario)
     db.session.commit()
-    log('CREAR_USUARIO', f"Usuario '{usuario.username}' creado", id_solicitante)
+    log('CREAR_USUARIO', f"Usuario '{usuario.username}' creado", id_usuario=int(id_solicitante), modulo='usuarios')
     return jsonify(_serializar(usuario)), 201
 
 
@@ -109,7 +109,7 @@ def actualizar(id_usuario):
         cambio_password = True
 
     db.session.commit()
-    log('ACTUALIZAR_USUARIO', f"Usuario '{u.username}' actualizado", id_solicitante)
+    log('ACTUALIZAR_USUARIO', f"Usuario '{u.username}' actualizado", id_usuario=int(id_solicitante), modulo='usuarios')
     if cambio_password:
         correo.notificar_cambio_password(u.email, u.username)
     return jsonify(_serializar(u))
@@ -128,7 +128,7 @@ def cambiar_estado(id_usuario):
     u.estado = not u.estado
     db.session.commit()
     accion = 'ACTIVAR_USUARIO' if u.estado else 'DESACTIVAR_USUARIO'
-    log(accion, f"Usuario '{u.username}' {'activado' if u.estado else 'desactivado'}", str(id_solicitante))
+    log(accion, f"Usuario '{u.username}' {'activado' if u.estado else 'desactivado'}", id_usuario=id_solicitante, modulo='usuarios')
     return jsonify(_serializar(u))
 
 
@@ -142,7 +142,7 @@ def desbloquear(id_usuario):
     u.bloqueado_hasta = None
     u.veces_bloqueado = 0
     db.session.commit()
-    log('DESBLOQUEAR_USUARIO', f"Usuario '{u.username}' desbloqueado manualmente", id_solicitante)
+    log('DESBLOQUEAR_USUARIO', f"Usuario '{u.username}' desbloqueado manualmente", id_usuario=int(id_solicitante), modulo='usuarios')
     correo.notificar_cuenta_desbloqueada(u.email, u.username)
     return jsonify(_serializar(u))
 
