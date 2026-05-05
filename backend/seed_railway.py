@@ -107,6 +107,35 @@ def seed_passwords():
     print(f"    {actualizados} contrasenas actualizadas")
 
 
+def aplicar_migraciones_permisos():
+    """Inserta permisos nuevos y los asigna al rol Administrador si aún no existen."""
+    permisos_nuevos = [
+        ('gestionar_roles', 'Gestionar roles y permisos del sistema'),
+    ]
+    conn = get_conn()
+    cursor = conn.cursor()
+    for nombre, descripcion in permisos_nuevos:
+        cursor.execute("SELECT COUNT(*) FROM permiso WHERE nombre=%s", (nombre,))
+        if cursor.fetchone()[0] == 0:
+            cursor.execute(
+                "INSERT INTO permiso (nombre, descripcion) VALUES (%s, %s)",
+                (nombre, descripcion),
+            )
+            cursor.execute("SELECT LAST_INSERT_ID()")
+            id_permiso = cursor.fetchone()[0]
+            cursor.execute("SELECT id FROM rol WHERE nombre='Administrador'")
+            row = cursor.fetchone()
+            if row:
+                cursor.execute(
+                    "INSERT IGNORE INTO rol_permiso (id_rol, id_permiso) VALUES (%s, %s)",
+                    (row[0], id_permiso),
+                )
+            print(f"  + permiso '{nombre}' (id={id_permiso}) asignado a Administrador")
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+
 def aplicar_migraciones_pendientes():
     """ALTER TABLE idempotentes y CREATE TABLE IF NOT EXISTS para BDs creadas con DDL anterior."""
     columnas_a_agregar = [
@@ -206,6 +235,7 @@ def main():
     if bd_ya_poblada():
         print("[seed] BD ya poblada, aplicando migraciones y refrescando contrasenas.")
         aplicar_migraciones_pendientes()
+        aplicar_migraciones_permisos()
         seed_passwords()
         print("\n[seed] OK")
         return
@@ -213,6 +243,7 @@ def main():
     run_sql_file(base_dir / 'scrip creacion BD.txt')
     run_sql_file(base_dir / 'scrip poblacion.txt')
     aplicar_migraciones_pendientes()
+    aplicar_migraciones_permisos()
     seed_passwords()
     print("\n[seed] OK")
 

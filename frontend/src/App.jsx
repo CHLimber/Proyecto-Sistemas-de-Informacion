@@ -12,6 +12,7 @@ import MantenimientoPage from './pages/mantenimiento/MantenimientoPage'
 import FinanzasPage from './pages/finanzas/FinanzasPage'
 import UsuariosPage from './pages/usuarios/UsuariosPage'
 import AuditoriaPage from './pages/auditoria/AuditoriaPage'
+import RolesPage from './pages/roles/RolesPage'
 import ModuloPlaceholder from './pages/ModuloPlaceholder'
 
 function RutaProtegida({ children }) {
@@ -58,6 +59,9 @@ export default function App() {
       } />
       <Route path="/auditoria" element={
         <RutaProtegida><AuditoriaPage /></RutaProtegida>
+      } />
+      <Route path="/roles" element={
+        <RutaProtegida><RolesPage /></RutaProtegida>
       } />
 
       <Route path="*" element={<Navigate to="/" replace />} />

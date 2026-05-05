@@ -31,6 +31,7 @@ def create_app(env: str = None):
     from .routes.productos import bp as productos_bp
     from .routes.usuarios import bp as usuarios_bp
     from .routes.auditoria import bp as auditoria_bp
+    from .routes.roles import bp as roles_bp
 
     app.register_blueprint(auth_bp,          url_prefix='/api/auth')
     app.register_blueprint(entidades_bp,     url_prefix='/api/entidades')
@@ -44,5 +45,6 @@ def create_app(env: str = None):
     app.register_blueprint(productos_bp,     url_prefix='/api/productos')
     app.register_blueprint(usuarios_bp,      url_prefix='/api/usuarios')
     app.register_blueprint(auditoria_bp,     url_prefix='/api/auditoria')
+    app.register_blueprint(roles_bp,         url_prefix='/api/roles')
 
     return app

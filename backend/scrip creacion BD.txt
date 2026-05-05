@@ -623,6 +623,37 @@ CREATE TABLE notificacion (
 );
 
 -- ============================================================
+-- MÓDULO 10: AUDITORÍA (BITÁCORA DE SISTEMA)
+-- ============================================================
+
+CREATE TABLE bitacora (
+  id          INT AUTO_INCREMENT PRIMARY KEY,
+  id_usuario  INT NULL,
+  accion      VARCHAR(50)  NOT NULL,
+  modulo      VARCHAR(50)  NULL,
+  descripcion TEXT         NULL,
+  ip          VARCHAR(45)  NULL,
+  fecha       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT fk_bitacora_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id) ON DELETE SET NULL,
+
+  INDEX ix_bitacora_id_usuario (id_usuario),
+  INDEX ix_bitacora_accion     (accion),
+  INDEX ix_bitacora_modulo     (modulo),
+  INDEX ix_bitacora_fecha      (fecha)
+);
+
+CREATE TABLE bitacora_detalle (
+  id             INT AUTO_INCREMENT PRIMARY KEY,
+  id_bitacora    INT  NOT NULL,
+  campo          VARCHAR(100) NOT NULL,
+  valor_anterior TEXT NULL,
+  valor_nuevo    TEXT NULL,
+
+  CONSTRAINT fk_bitdet_bitacora FOREIGN KEY (id_bitacora) REFERENCES bitacora(id) ON DELETE CASCADE
+);
+
+-- ============================================================
 -- VISTA: cuentas_por_cobrar
 -- ============================================================
 

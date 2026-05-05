@@ -25,6 +25,7 @@ const MODULOS = [
       { to: '/productos',     icon: '📦', label: 'Productos' },
       { to: '/catalogos',     icon: '📂', label: 'Catálogos' },
       { to: '/usuarios',      icon: '🔑', label: 'Usuarios' },
+      { to: '/roles',         icon: '🛡️', label: 'Roles y Permisos' },
       { to: '/auditoria',     icon: '📋', label: 'Auditoría' },
     ],
   },
